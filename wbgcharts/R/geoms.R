@@ -19,6 +19,7 @@ trillions = label_divide(12)
 
 # = Pretty simple "compound" geoms =============================================
 
+#' @export
 geom_lined_area <- function(color = "white", size = 0.35, ...) {
   c(
     geom_area(...),
@@ -26,6 +27,7 @@ geom_lined_area <- function(color = "white", size = 0.35, ...) {
   )
 }
 
+#' @export
 geom_percent_col <- function(mapping = aes(), fill = NULL, fill.bg = "gray80", ...) {
   c(
     geom_col(modifyList(mapping, aes(y = 100)), fill = fill.bg, ...),
@@ -33,6 +35,7 @@ geom_percent_col <- function(mapping = aes(), fill = NULL, fill.bg = "gray80", .
   )
 }
 
+#' @export
 geom_other_dotplot <- function(mapping = aes(), color.line = "black", size.line = 0.25, arrow = NULL, ...) {
   # TODO break apart both mapping and ... so that anything with .line suffix is sent
   # to line geom, and the rest to point geom.
@@ -47,6 +50,7 @@ geom_other_dotplot <- function(mapping = aes(), color.line = "black", size.line 
   )
 }
 
+#' @export
 geom_other_dotplot_label <- function(mapping = aes(), data = NULL, side = "left", ...) {
   if (!is.null(data)) {
     stop("This geom does not yet support its own data (wouldn't be hard to add")
