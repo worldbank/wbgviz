@@ -1,8 +1,10 @@
 library(dplyr)
 
+wb_newcache <- wbstats::wbcache()
+
 wbgref <- list()
 
-countries_df <- wbstats::wb_cachelist$countries %>%
+countries_df <- wb_newcache$countries %>%
   filter(region != "Aggregates")
 
 wbgref$countries <- list(
@@ -13,7 +15,7 @@ wbgref$countries <- list(
   regions = countries_df %>% select(iso3c, region_iso3c = regionID)
 )
 
-regions_df <- wbstats::wb_cachelist$countries %>%
+regions_df <- wb_newcache$countries %>%
   filter(iso3c %in% c("EAS","ECS","LCN","MEA","NAC","SAS","SSF"))
 
 wbgref$regions <- list(
@@ -24,18 +26,18 @@ wbgref$regions <- list(
 )
 
 wbgref$all_geo <- list(
-  iso2c = wbstats::wb_cachelist$countries$iso2c,
-  iso3c = wbstats::wb_cachelist$countries$iso3c,
-  labels = setNames(wbstats::wb_cachelist$countries$country, wbstats::wb_cachelist$countries$iso3c),
-  iso2to3 = wbstats::wb_cachelist$countries[,c("iso2c", "iso3c")]
+  iso2c = wb_newcache$countries$iso2c,
+  iso3c = wb_newcache$countries$iso3c,
+  labels = setNames(wb_newcache$countries$country, wb_newcache$countries$iso3c),
+  iso2to3 = wb_newcache$countries[,c("iso2c", "iso3c")]
 )
 
 #' @import wbstats
 #' @import magrittr
 #' @import tidyr
 #' @export
-wbgdata <-function(country = "all", col.indicator = FALSE, ..., indicator.wide = TRUE, removeNA = FALSE) {
-  df <- wbstats::wb(country, removeNA = removeNA, ...)
+wbgdata <-function(country = "all", col.indicator = FALSE, cache = wbgcharts::wb_newcache, ..., indicator.wide = TRUE, removeNA = FALSE) {
+  df <- wbstats::wb(country, removeNA = removeNA, cache = cache,...)
 
   df <- df %>% left_join(wbgref$all_geo$iso2to3, by = "iso2c")
   if (!col.indicator)
@@ -50,7 +52,7 @@ wbgdata <-function(country = "all", col.indicator = FALSE, ..., indicator.wide =
   df
 }
 
-wdi_ind <- wbstats::wb_cachelist$indicators
+wdi_ind <- wb_newcache$indicators
 
 #' @export
 wbg_source <- function(indicatorIDs) {
@@ -75,4 +77,5 @@ wbg_name <- function(indicatorID) {
   return(wdi_ind$indicator[wdi_ind$indicatorID == indicatorID])
 }
 
-#save(wbgref, file="./data/wbgref.rda")
+save(wbgref, file="./data/wbgref.rda")
+save(wb_newcache, file="./data/wb_newcache.rda")

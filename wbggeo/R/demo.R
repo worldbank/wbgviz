@@ -1,13 +1,5 @@
-library(ggplot2)
-library(wbgcharts)
-library(wbggeo)
-library(extrafont)
-
-style <- wbgcharts::style_atlas()
-quality = "high"
-aspect_ratio = 1
-cache <- wbstats::wbcache()
-
+#' @import ggplot2 wbgcharts
+#' @export
 wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1) {
   p <- ggplot() +
     geom_map(data = data, aes_string(map_id = iso3c, fill = variable), map = maps$countries) +
@@ -25,6 +17,8 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
   pg
 }
 
+#' @import ggplot2 wbgcharts
+#' @export
 wbg_bubble_map <- function(data, maps, style, variable, breaks, iso3c = "iso3c", aspect_ratio = 1, max_size = 1) {
   p <- ggplot(data = data) +
     geom_polygon(data = maps$countries, aes(long, lat, group = group), fill = "grey80") +
@@ -44,9 +38,11 @@ wbg_bubble_map <- function(data, maps, style, variable, breaks, iso3c = "iso3c",
     style$theme_bubble_map()
 }
 
+#' @import ggplot2 wbgcharts
+#' @export
 wbggeo_demo_atlas_5g_choropleth <- function(style = style_atlas(), quality = "high", aspect_ratio = 1) {
   indicator <- "SG.GEN.PARL.ZS"
-  df <- wbgdata(country = "countries_only", indicator = indicator, startdate = 2016, enddate = 2016, cache = cache)
+  df <- wbgdata(country = "countries_only", indicator = indicator, startdate = 2016, enddate = 2016)
 
   df$SG.GEN.PARL.ZS <- supercut(
     df$SG.GEN.PARL.ZS,
@@ -71,9 +67,11 @@ wbggeo_demo_atlas_5g_choropleth <- function(style = style_atlas(), quality = "hi
   )
 }
 
+#' @import ggplot2 wbgcharts
+#' @export
 wbggeo_demo_bubble <- function(style = style_atlas(), quality = "high", aspect_ratio = 1) {
   indicator <- "SP.POP.TOTL"
-  df <- wbgdata(country = "countries_only", indicator = indicator, startdate = 2014, enddate = 2014, cache = cache)
+  df <- wbgdata(country = "countries_only", indicator = indicator, startdate = 2014, enddate = 2014)
 
   maps <- wbgmaps[[quality]]
   breaks <- c(1e7,1e8,5e8,1e9)
