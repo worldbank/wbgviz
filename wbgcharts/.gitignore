@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# We don't have permission to redistribute this copyright font
+inst/fonts/Avenir/*
