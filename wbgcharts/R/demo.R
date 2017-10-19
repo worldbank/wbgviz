@@ -46,6 +46,58 @@ wbgcharts_demo_region_cols <- function(style = style_atlas()) {
   )
 }
 
+#' @import tidyr
+#' @export
+wbgcharts_demo_bullets <- function(style = style_atlas()) {
+  N <- 10
+
+  df <- wbgdata(
+    country = wbgref$countries$iso3c,
+    indicator = c("SE.SEC.NENR.MA", "SE.SEC.NENR.FE"),
+    startdate = 2010, enddate = 2015
+  )
+
+  # Get the most recent year for each country
+  df <- df %>%
+    filter(complete.cases(.)) %>%
+    group_by(iso3c) %>%
+    filter(date == max(date)) %>%
+    ungroup()
+
+  # Find the top N countries by gap, but order by FE
+  bottom <- df %>%
+    arrange(SE.SEC.NENR.MA - SE.SEC.NENR.FE) %>%
+    tail(N) %>%
+    arrange(-SE.SEC.NENR.FE) %>%
+    pull(iso3c)
+
+  # Reorder & reshape for ggplotting
+  df.long <- df %>%
+    filter(iso3c %in% bottom) %>%
+    mutate(iso3c = factor(iso3c, levels = bottom)) %>%
+    tidyr::gather(indicatorID, value, SE.SEC.NENR.FE, SE.SEC.NENR.MA)
+
+  p <- ggplot(df.long, aes(x = iso3c, y = value, fill=indicatorID)) +
+    geom_col(position = "bullet") +
+    scale_fill_manual(values = style$colors$categorical, labels = c("Female", "Male")) +
+    scale_x_discrete(labels = wbgref$countries$labels) +
+    scale_y_continuous(labels = round, expand = c(0, 0), limits = c(0, 100)) +
+    coord_flip() +
+    style$theme() +
+    style$theme_barchart() +
+    theme(legend.position = c(1,1), legend.justification = c(1,1), legend.direction = "horizontal")
+
+  figure(
+    p,
+    theme =style$theme(),
+    title = "The countries with the largest enrolment gender gaps are mostly low income, with one surprising exception.",
+    subtitle = "Net enrolment rate, secondary (%)",
+    note = paste("Note:", N, "countries with largest gap between male and female enrolment, ordered by female enrolment (low to high)"),
+    source = paste("Source:",wbg_source("SE.SEC.NENR")),
+    source_url = "http://datatopics.worldbank.org/sdgatlas/SDG-04-quality-education.html"
+  )
+}
+
 #' @import wbstats tidyr
 #' @export
 wbgcharts_demo_atlas_2a_stackedarea <- function(style = style_atlas()) {

@@ -77,5 +77,5 @@ wbg_name <- function(indicatorID) {
   return(wdi_ind$indicator[wdi_ind$indicatorID == indicatorID])
 }
 
-save(wbgref, file="./data/wbgref.rda")
-save(wb_newcache, file="./data/wb_newcache.rda")
+#save(wbgref, file="./data/wbgref.rda")
+#save(wb_newcache, file="./data/wb_newcache.rda")

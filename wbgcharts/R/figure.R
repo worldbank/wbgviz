@@ -18,7 +18,7 @@ print.wbgfigure <- function(x) {
     source_url = x$meta$source_url,
     show.logo = TRUE
   )
-  grid.newpage()
+  #grid.newpage()
   grid.draw(f)
 }
 
