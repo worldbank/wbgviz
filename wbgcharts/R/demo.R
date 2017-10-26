@@ -1,20 +1,24 @@
 #' @export
-#' @import ggplot2
-wbgcharts_demo_region_bars <- function(style = style_atlas()) {
-  indicator <- "SP.POP.TOTL"
-  df <- wbgdata(country = wbgref$regions$iso3c, indicator = indicator, startdate = 2015, enddate = 2015)
-  df <- df %>% arrange(value) %>% mutate(iso3c = factor(iso3c, iso3c))
-  p <- ggplot(df, aes(x = iso3c, y = value, fill=iso3c)) +
-    geom_col() +
-    geom_bartext(aes(label = billions(1)(value)), family = calc_element("axis.text.y", style$theme())$family, size = style$gg_text_size ) +
-    coord_flip() +
-    scale_fill_manual(values = style$colors$regions, labels = style$labels$regions) +
-    scale_x_discrete(labels = style$labels$regions) +
-    scale_y_continuous(labels = billions(1)) +
-    style$theme_barchart() +
-    theme(legend.position = "none")
+wbgcharts_demo_region_bars <- function() {
+  indicator = "SP.POP.TOTL"
   figure(
-    p,
+    data = function() {
+      df <- wbgdata(country = wbgref$regions$iso3c, indicator = indicator, startdate = 2015, enddate = 2015, indicator.wide = F)
+      df <- df %>% arrange(value) %>% mutate(iso3c = factor(iso3c, iso3c))
+      df
+    },
+    plot = function(df, style = style_atlas()) {
+      ggplot(df, aes(x = iso3c, y = value, fill=iso3c)) +
+        geom_col() +
+        geom_bartext(aes(label = billions(1)(value)), family = calc_element("axis.text.y", style$theme())$family, size = style$gg_text_size ) +
+        coord_flip() +
+        scale_fill_manual(values = style$colors$regions, labels = style$labels$regions) +
+        scale_x_discrete(labels = style$labels$regions) +
+        scale_y_continuous(labels = billions(1)) +
+        style$theme() +
+        style$theme_barchart() +
+        theme(legend.position = "none")
+    },
     title = "East Asia & Pacific is definitely the most populous region.",
     subtitle = paste(wbg_name(indicator), "(billions)"),
     source = paste("Source:", wbg_source(indicator)),
@@ -23,103 +27,98 @@ wbgcharts_demo_region_bars <- function(style = style_atlas()) {
 }
 
 #' @export
-wbgcharts_demo_region_cols <- function(style = style_atlas()) {
-  df <- wbgdata(country = wbgref$regions$iso3c, indicator = "NY.GDP.MKTP.CD", startdate = 2015, enddate = 2015)
-  p <- ggplot(df, aes(x = iso3c, y = value, fill=iso3c)) +
-    geom_col() +
-    scale_fill_manual(values = style$colors$regions, labels = style$labels$regions) +
-    scale_x_discrete(labels = style$labels$regions_wrapped) +
-    scale_y_continuous(labels = trillions()) +
-    style$theme() +
-    theme(
-      legend.position = "none",
-      axis.text.x = element_text(hjust = 1, angle = 60)
+wbgcharts_demo_region_cols <- function() {figure(
+  data = function() {
+    wbgdata(country = wbgref$regions$iso3c, indicator = "NY.GDP.MKTP.CD", startdate = 2015, enddate = 2015, indicator.wide = F)
+  },
+  plot = function(df, style = style_atlas()) {
+    ggplot(df, aes(x = iso3c, y = value, fill=iso3c)) +
+      geom_col() +
+      scale_fill_manual(values = style$colors$regions, labels = style$labels$regions) +
+      scale_x_discrete(labels = style$labels$regions_wrapped) +
+      scale_y_continuous(labels = trillions()) +
+      style$theme() +
+      theme(
+        legend.position = "none",
+        axis.text.x = element_text(hjust = 1, angle = 60)
+      )
+  },
+  title = "East Asia & Pacific is winning, but Europe & Central Asia is surprisingly close behind.",
+  subtitle = "GDP (current US$, trillions)",
+  note = "Note: Consider a column chart instead so the axis labels fit more easily",
+  source = "Source: This script. WDI (ZX.ABC.DEFG).",
+  source_url = "http://datatopics.worldbank.org/sdgatlas/SDG-01-no-poverty.html"
+)}
+
+#' @export
+wbgcharts_demo_bullets <- function(N = 10) {figure(
+  data <- function() {
+    df <- wbgdata(
+      country = wbgref$countries$iso3c,
+      indicator = c("SE.SEC.NENR.MA", "SE.SEC.NENR.FE"),
+      startdate = 2010, enddate = 2015
     )
-  figure(
-    p,
-    theme =style$theme(),
-    title = "East Asia & Pacific is winning, but Europe & Central Asia is surprisingly close behind.",
-    subtitle = "GDP (current US$, trillions)",
-    note = "Note: Consider a column chart instead so the axis labels fit more easily",
-    source = "Source: This script. WDI (ZX.ABC.DEFG).",
-    source_url = "http://datatopics.worldbank.org/sdgatlas/SDG-01-no-poverty.html"
-  )
-}
 
-#' @import tidyr
+    # Get the most recent year for each country
+    df <- df %>%
+      filter(complete.cases(.)) %>%
+      group_by(iso3c) %>%
+      filter(date == max(date)) %>%
+      ungroup()
+
+    # Find the top N countries by gap, but order by FE
+    bottom <- df %>%
+      arrange(SE.SEC.NENR.MA - SE.SEC.NENR.FE) %>%
+      tail(N) %>%
+      arrange(-SE.SEC.NENR.FE) %>%
+      pull(iso3c)
+
+    # Reorder & reshape for ggplotting
+    df.long <- df %>%
+      filter(iso3c %in% bottom) %>%
+      mutate(iso3c = factor(iso3c, levels = bottom)) %>%
+      tidyr::gather(indicatorID, value, SE.SEC.NENR.FE, SE.SEC.NENR.MA)
+
+    df.long
+  },
+  plot = function(df.long, style = style_atlas()) {
+    p <- ggplot(df.long, aes(x = iso3c, y = value, fill=indicatorID)) +
+      geom_col(position = "bullet") +
+      scale_fill_manual(values = style$colors$categorical, labels = c("Female", "Male")) +
+      scale_x_discrete(labels = wbgref$countries$labels) +
+      scale_y_continuous(labels = round, expand = c(0, 0), limits = c(0, 100)) +
+      coord_flip() +
+      style$theme() +
+      style$theme_barchart() +
+      theme(legend.position = c(1,1), legend.justification = c(1,1), legend.direction = "horizontal")
+  },
+  title = "The countries with the largest enrolment gender gaps are mostly low income, with one surprising exception.",
+  subtitle = "Net enrolment rate, secondary (%)",
+  note = paste("Note:", N, "countries with largest gap between male and female enrolment, ordered by female enrolment (low to high)"),
+  source = paste("Source:",wbg_source("SE.SEC.NENR")),
+  source_url = "http://datatopics.worldbank.org/sdgatlas/SDG-04-quality-education.html"
+)}
+
 #' @export
-wbgcharts_demo_bullets <- function(style = style_atlas()) {
-  N <- 10
+wbgcharts_demo_atlas_2a_stackedarea <- function() {figure(
+  data = function() {
+    subset(stunting, iso3c != "NAC")
+  },
+  plot = function(df, style = style_atlas()) {
+    ggplot(data = df, aes(x = date, y = stunting, fill = iso3c)) +
+      geom_lined_area(position="stack") +
+      scale_x_continuous(expand = c(0,0)) +
+      scale_y_continuous(limits=c(0,300)*1e6, labels = millions()) +
+      scale_fill_manual(values = style$colors$regions, labels = wbgref$regions$labels) +
+      style$theme() +
+      theme(legend.justification = c(0, 1))#, legend.position = "none")
+  },
+  title = "Child stunting is steadily declining in most regions but increasing in Sub-Saharan Africa",
+  subtitle = "Number of children under age 5 that are stunted, height for age (millions)",
+  source = "Source: United Nations Children's Fund, World Health Organization and World Bank, 2016, Levels and Trends in Child Malnutrition, New York; WDI (SH.STA.STNT.ZS).",
+  source_url = "http://datatopics.worldbank.org/sdgatlas/sdg2#stunting"
+)}
 
-  df <- wbgdata(
-    country = wbgref$countries$iso3c,
-    indicator = c("SE.SEC.NENR.MA", "SE.SEC.NENR.FE"),
-    startdate = 2010, enddate = 2015
-  )
-
-  # Get the most recent year for each country
-  df <- df %>%
-    filter(complete.cases(.)) %>%
-    group_by(iso3c) %>%
-    filter(date == max(date)) %>%
-    ungroup()
-
-  # Find the top N countries by gap, but order by FE
-  bottom <- df %>%
-    arrange(SE.SEC.NENR.MA - SE.SEC.NENR.FE) %>%
-    tail(N) %>%
-    arrange(-SE.SEC.NENR.FE) %>%
-    pull(iso3c)
-
-  # Reorder & reshape for ggplotting
-  df.long <- df %>%
-    filter(iso3c %in% bottom) %>%
-    mutate(iso3c = factor(iso3c, levels = bottom)) %>%
-    tidyr::gather(indicatorID, value, SE.SEC.NENR.FE, SE.SEC.NENR.MA)
-
-  p <- ggplot(df.long, aes(x = iso3c, y = value, fill=indicatorID)) +
-    geom_col(position = "bullet") +
-    scale_fill_manual(values = style$colors$categorical, labels = c("Female", "Male")) +
-    scale_x_discrete(labels = wbgref$countries$labels) +
-    scale_y_continuous(labels = round, expand = c(0, 0), limits = c(0, 100)) +
-    coord_flip() +
-    style$theme() +
-    style$theme_barchart() +
-    theme(legend.position = c(1,1), legend.justification = c(1,1), legend.direction = "horizontal")
-
-  figure(
-    p,
-    theme =style$theme(),
-    title = "The countries with the largest enrolment gender gaps are mostly low income, with one surprising exception.",
-    subtitle = "Net enrolment rate, secondary (%)",
-    note = paste("Note:", N, "countries with largest gap between male and female enrolment, ordered by female enrolment (low to high)"),
-    source = paste("Source:",wbg_source("SE.SEC.NENR")),
-    source_url = "http://datatopics.worldbank.org/sdgatlas/SDG-04-quality-education.html"
-  )
-}
-
-#' @import wbstats tidyr
-#' @export
-wbgcharts_demo_atlas_2a_stackedarea <- function(style = style_atlas()) {
-  # Basic chart
-  p <- ggplot(data = subset(stunting, iso3c != "NAC"), aes(x = date, y = stunting, fill = iso3c)) +
-    geom_lined_area(position="stack") +
-    scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(breaks = c(0,100,200,300)*1e6, limits=c(0,300)*1e6, labels = c(0,100,200,300)) +
-    scale_fill_manual(values = style$colors$regions, labels = style$labels$regions) +
-    style$theme() +
-    theme(legend.justification = c(0, 1))#, legend.position = "none")
-
-  figure(
-    p,
-    title = "Child stunting is steadily declining in most regions but increasing in Sub-Saharan Africa",
-    subtitle = "Number of children under age 5 that are stunted, height for age (millions)",
-    source = "Source: United Nations Children's Fund, World Health Organization and World Bank, 2016, Levels and Trends in Child Malnutrition, New York; WDI (SH.STA.STNT.ZS).",
-    source_url = "http://datatopics.worldbank.org/sdgatlas/sdg2#stunting"
-  )
-}
-
-#' @import dplyr
 #' @export
 wbgcharts_demo_atlas_1a_panel <- function(style = style_atlas()) {
 
@@ -187,7 +186,6 @@ make_data_2b <- function() {
   save(stunting_quintiles, file="./data/stunting_quintiles.rda")
 }
 
-#' @import dplyr
 #' @export
 wbgcharts_demo_atlas_2b_dot <- function(style = style_atlas()) {
   indicators <- list(
@@ -232,8 +230,6 @@ make_data_6f <- function() {
   save(water_inequality, file="./data/water_inequality.rda")
 }
 
-#' @import dplyr
-#' @import tidyr
 #' @export
 wbgcharts_demo_atlas_6f_dot <- function(style = style_atlas()) {
   indicator_labels <- list(
@@ -298,8 +294,6 @@ make_data_8c <- function() {
   save(neet_by_gender, file="./data/neet_by_gender.rda")
 }
 
-#' @import dplyr
-#' @import tidyr
 #' @export
 wbgcharts_demo_atlas_8c_scatter <- function(style = style_atlas()) {
   p <- ggplot(neet_by_gender, aes(x = SL.UEM.NEET.MA.ZS, y = SL.UEM.NEET.FE.ZS)) +
@@ -336,9 +330,6 @@ make_data_4k <- function() {
   save(out_of_school, file="./data/out_of_school.rda")
 }
 
-#' @import dplyr
-#' @import tidyr
-#' @import gtable
 #' @export
 wbgcharts_demo_atlas_4k_area_panels <- function(style = style_atlas()) {
   # impute EAS 1997
@@ -468,7 +459,6 @@ make_data_17c <- function() {
   save(fdi_to_lics, file="./data/fdi_to_lics.rda")
 }
 
-#' @import dplyr
 #' @export
 wbgcharts_demo_atlas_17c_line <- function(style = style_atlas()) {
   p <- ggplot(fdi_to_lics, aes(x = date, y = value)) +

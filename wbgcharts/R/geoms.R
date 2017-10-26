@@ -1,9 +1,19 @@
 # = Handy labelling functions ==================================================
 
+dp <- Vectorize(function(x) {
+  if ((x %% 1) != 0) {
+    nchar(strsplit(sub('0+$', '', as.character(x)), ".", fixed=TRUE)[[1]][[2]])
+  } else {
+    return(0)
+  }
+})
+
 label_divide <- function(scale) {
-  function(precision = 0) {
+  function(precision = NULL) {
     function(label) {
-      format(round(label / (10^scale), digits = precision), nsmall = precision)
+      scaled_values <- label / (10^scale)
+      digits <- if (is.null(precision)) max(dp(scaled_values)) else precision
+      format(round(scaled_values, digits = digits), nsmall = digits)
     }
   }
 }

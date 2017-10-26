@@ -1,49 +1,156 @@
-library(dplyr)
+#wb_newcache <- wbstats::wbcache()
 
-wb_newcache <- wbstats::wbcache()
+REFRESH_PERIOD_DAYS <- 30
 
-wbgref <- list()
-
-countries_df <- wb_newcache$countries %>%
-  filter(region != "Aggregates")
-
-wbgref$countries <- list(
-  iso2c = countries_df$iso2c,
-  iso3c = countries_df$iso3c,
-  labels = setNames(countries_df$country, countries_df$iso3c),
-  iso2to3 = countries_df %>% select(iso2c, iso3c),
-  regions = countries_df %>% select(iso3c, region_iso3c = regionID)
-)
-
-regions_df <- wb_newcache$countries %>%
-  filter(iso3c %in% c("EAS","ECS","LCN","MEA","NAC","SAS","SSF"))
-
-wbgref$regions <- list(
-  iso2c = regions_df$iso2c,
-  iso3c = regions_df$iso3c,
-  labels = setNames(regions_df$country, regions_df$iso3c),
-  iso2to3 = regions_df[,c("iso2c", "iso3c")]
-)
-
-wbgref$all_geo <- list(
-  iso2c = wb_newcache$countries$iso2c,
-  iso3c = wb_newcache$countries$iso3c,
-  labels = setNames(wb_newcache$countries$country, wb_newcache$countries$iso3c),
-  iso2to3 = wb_newcache$countries[,c("iso2c", "iso3c")]
-)
-
-#' @import wbstats
-#' @import magrittr
-#' @import tidyr
 #' @export
-wbgdata <-function(country = "all", col.indicator = FALSE, cache = wbgcharts::wb_newcache, ..., indicator.wide = TRUE, removeNA = FALSE) {
-  df <- wbstats::wb(country, removeNA = removeNA, cache = cache,...)
+get_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts")) {
+  msg_to_update <- "Countries/series cache is stale - use refresh_wbcache() to update."
+  filename <- file.path(cachedir, "wbcache.RData")
+  if (!file.exists(filename)) {
+    warning(msg_to_update)
+    wbstats::wb_cachelist
+  } else if (difftime(Sys.time(), file.info(filename)$mtime, units = "days") > REFRESH_PERIOD_DAYS) {
+    warning(msg_to_update)
+    readRDS(file=filename)
+  } else {
+    readRDS(file=filename)
+  }
+}
 
-  df <- df %>% left_join(wbgref$all_geo$iso2to3, by = "iso2c")
-  if (!col.indicator)
-    df <- df %>% select(-indicator)
-  df <- df %>% select(-iso2c, -country)
-  df <- df %>% mutate(date = as.numeric(date))
+#' @export
+refresh_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts"), force = FALSE, silent = FALSE) {
+  filename <- file.path(cachedir, "wbcache.RData")
+  if (!file.exists(filename) |
+      force |
+      difftime(Sys.time(), file.info(filename)$mtime, units = "days") > REFRESH_PERIOD_DAYS)
+  {
+    newcache <- wbstats::wbcache()
+    if (!file.exists(cachedir)) dir.create(cachedir, recursive = TRUE)
+    saveRDS(newcache, file = filename)
+  } else {
+    if (!silent) {
+      message("Countries/series cache is not stale - use force = TRUE to force update")
+    }
+  }
+}
+
+create_wbgref <- function() {
+  wb_newcache <- get_wbcache()
+
+  wbgref <- list()
+
+  countries_df <- wb_newcache$countries %>%
+    filter(region != "Aggregates")
+
+  wbgref$countries <- list(
+    iso2c = countries_df$iso2c,
+    iso3c = countries_df$iso3c,
+    labels = setNames(countries_df$country, countries_df$iso3c),
+    iso2to3 = countries_df %>% select(iso2c, iso3c),
+    regions = countries_df %>% select(iso3c, region_iso3c = regionID)
+  )
+
+  regions_df <- wb_newcache$countries %>%
+    filter(iso3c %in% c("EAS","ECS","LCN","MEA","NAC","SAS","SSF"))
+
+  wbgref$regions <- list(
+    iso2c = regions_df$iso2c,
+    iso3c = regions_df$iso3c,
+    labels = setNames(regions_df$country, regions_df$iso3c),
+    iso2to3 = regions_df[,c("iso2c", "iso3c")]
+  )
+
+  wbgref$all_geo <- list(
+    iso2c = wb_newcache$countries$iso2c,
+    iso3c = wb_newcache$countries$iso3c,
+    labels = setNames(wb_newcache$countries$country, wb_newcache$countries$iso3c),
+    iso2to3 = wb_newcache$countries[,c("iso2c", "iso3c")]
+  )
+
+  wbgref <<- wbgref
+}
+
+wbgdata_from_databank <- function(country = "all", indicator, startdate, enddate, filename) {
+  df <- read.csv(filename, na.strings = "..", stringsAsFactors = FALSE, check.names = FALSE)
+
+  df <- df %>%
+    select(iso3c=`Country Code`,indicatorID=`Series Code`, date=`Time`, value=`Value`)
+
+  if (!(all(indicator %in% df$indicatorID)))
+    stop("Databank file does not match API call (indicators)")
+
+  if (!(all(c(startdate,enddate) %in% df$date)))
+    warning("Databank file does not contain start/end dates")
+
+  #FIXME check & filter countries too
+
+  df %>% filter(indicatorID %in% indicator, date >= startdate, date <= enddate)
+}
+
+wbgdata_to_databank <- function(df, filename) {
+  df <- df %>%
+    select(`Country Code`=iso3c,`Series Code`=indicatorID, `Time`=date, `Value`=value)
+
+  write.csv(df, filename, na = "..", row.names = FALSE)
+}
+
+wbgdata_build_cache_filename <- function(country, indicator, startdate, enddate) {
+  long <- paste(paste(country, collapse = "+"), paste(indicator, collapse = "+"), startdate, enddate, sep = "_")
+  hash <- digest::digest(long, "md5") # not a security context so md5 will be fine
+  paste0(hash,".csv")
+}
+
+#' @export
+wbgdata <-function(country = "all", indicator, startdate, enddate, ...,
+                   col.indicator = FALSE, cache = get_wbcache(),
+                   indicator.wide = TRUE, removeNA = FALSE, offline="none") {
+  offline_path <- ".wbgdata"
+  if (offline != "none") {
+    offline_file <- file.path(offline_path, wbgdata_build_cache_filename(country, indicator, startdate, enddate))
+    if (file.exists(offline_file)) {
+      offline_df <- wbgdata_from_databank(country, indicator, startdate, enddate, filename = offline_file)
+    } else {
+      warning("No offline data found for TODO. Will create.")
+      dir.create(offline_path, recursive = TRUE)
+      offline <- "overwrite"
+    }
+  }
+  if (offline == "only") {
+    df <- offline_df
+  } else {
+    df <- wbstats::wb(country, indicator, startdate, enddate, removeNA = removeNA, cache = cache,...)
+
+    df <- df %>% left_join(wbgref$all_geo$iso2to3, by = "iso2c")
+    if (!col.indicator)
+      df <- df %>% select(-indicator)
+    df <- df %>% select(-iso2c, -country)
+    df <- df %>% mutate(date = as.numeric(date))
+
+    df <- df %>% select(iso3c, indicatorID, date, value)
+
+    if (offline %in% c("warn", "stop")) {
+      same <- all.equal(df %>% arrange(indicatorID, iso3c, date), offline_df %>% arrange(indicatorID, iso3c, date))
+      if (same != TRUE) {
+        if (offline == "warn") {
+          warning(paste0(
+            "Data changed, using new data.\n",
+            "Rerun with offline='overwrite' to accept new data & eliminate this warning\n",
+            "Previous data cached in: ", offline_file
+          ))
+        } else {
+          stop(paste0(
+            "Data changed.\n",
+            "Rerun with offline='overwrite' to accept new data & eliminate this warning\n",
+            "Previous data cached in: ", offline_file
+          ))
+        }
+      }
+    } else if (offline == "overwrite") {
+      wbgdata_to_databank(df, filename = offline_file)
+    } else if (offline == "none") {
+      # nothing
+    }
+  }
 
   if (indicator.wide) {
     df <- df %>% tidyr::spread("indicatorID", "value")
@@ -52,10 +159,11 @@ wbgdata <-function(country = "all", col.indicator = FALSE, cache = wbgcharts::wb
   df
 }
 
-wdi_ind <- wb_newcache$indicators
 
 #' @export
 wbg_source <- function(indicatorIDs) {
+  wdi_ind <- get_wbcache()$indicators
+
   core_indicators <- setdiff(indicatorIDs, c('SP.POP.TOTL', 'SP.RUR.TOTL', 'SP.URB.TOTL'))
   core_indicators <- core_indicators[!grepl('SP\\.POP', core_indicators)]
   if (length(core_indicators) == 0) {
@@ -74,8 +182,7 @@ wbg_source <- function(indicatorIDs) {
 
 #' @export
 wbg_name <- function(indicatorID) {
+  wdi_ind <- get_wbcache()$indicators
+
   return(wdi_ind$indicator[wdi_ind$indicatorID == indicatorID])
 }
-
-#save(wbgref, file="./data/wbgref.rda")
-#save(wb_newcache, file="./data/wb_newcache.rda")

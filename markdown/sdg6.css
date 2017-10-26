@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css?family=Oswald|Roboto');
+
+html {
+  background-color: #CC0641;
+}
+
+h1 {
+  font-size: 40px;
+}
+h1.title {
+  display: none;
+}
+h2 {
+  font-size: 25px;
+}
+h3 {
+  font-size: 20px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+
+h1,h3 {
+    font-family: Oswald, sans-serif;
+    font-weight: bold;
+    color: #CC0641
+}
+h2 {
+    font-family: Avenir-book, Roboto, sans-serif;
+    color: #CC0641
+}
+
+h2 + p {
+    font-size: 18px;
+}
+.author, .date{
+    display: none;
+}
+
+body {
+    font-family: Avenir-book, Roboto, sans-serif;
+    color: #575756;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding-top: 100px;
+    /* on mobile should remove these */
+    padding-right: 75px;
+    padding-left: 75px;
+}
+
+figure {
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+.figure.title {
+  font-weight: bold;
+}
+.figure.subtitle {
+}
+.figure.note {
+  font-size: smaller;
+  margin-bottom: 10px;
+}
+.figure.source {
+  font-size: smaller;
+  margin-bottom: 10px;
+}
+
+.btn {
+  margin-bottom: -50px !important;
+  margin-right: -70px;
+  color: grey;
+}
+
+h1 {
+  background: url("sdg6.svg") -10px -10px no-repeat;
+  background-size: 75px;
+  margin-left: -65px; /* change this to fit your needs */
+  padding-left: 65px;
+  padding-bottom: 20px;
+  margin-bottom: 0px;
+}
+h3 {
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+
+/* Stuff for ggiraph figures */
+
+.area_sensor {
+  fill-opacity: 0.0
+}
+
+/* modern browswers would be nice to use this */
+/*
+.area_sensor:hover {
+  mix-blend-mode: color-burn;
+  fill-opacity: 1.0;
+  fill: #ccc
+}
+*/
+
+/* Old browsers */
+.area_sensor:hover {
+  fill-opacity: 0.3;
+  fill: white
+}
+
+text {
+  pointer-events: none;
+}

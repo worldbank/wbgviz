@@ -1,0 +1,236 @@
+---
+title: "Clean water and sanitation"
+author: "World Bank Group"
+date: "29 March 2017"
+output:
+  html_document:
+    code_folding: hide
+    css: sdg6.css
+    includes:
+      after_body: post_render.html
+      before_body: pre_render.html
+    self_contained: no
+  md_document:
+    variant: markdown_github
+always_allow_html: yes
+---
+```{r echo=F, eval=T, warning=FALSE}
+  source("rmd-header.R")
+```
+
+# Clean water and sanitation
+
+```{r sdg6-intro, echo=T, eval=T, write.df="checks", warning=FALSE, message=FALSE}
+library(ggplot2)
+library(wbgcharts)
+library(tidyr)
+library(knitr)
+library(wbggeo)
+library(dplyr)
+
+df <- wbgdata(country = "1W",
+              indicator = c("SH.H2O.SAFE.ZS","SH.STA.ACSN","SP.POP.TOTL","SH.STA.ODFC.ZS"),
+              startdate=1990, enddate=2015)
+
+checks <- data.frame(Value = unlist(list(
+  "World access to improved water sources"
+  = df$SH.H2O.SAFE.ZS[df$date == 2015],
+  
+  "Increase in population with access to sanitation"
+  = df$SH.STA.ACSN[df$date == 2015]/100 * df$SP.POP.TOTL[df$date == 2015] - 
+    df$SH.STA.ACSN[df$date == 1990]/100 * df$SP.POP.TOTL[df$date == 1990],
+  
+  "Open defecation, 1990"
+  = df$SH.STA.ODFC.ZS[df$date == 1990],
+
+  "Open defecation, 2015"
+  = df$SH.STA.ODFC.ZS[df$date == 2015]
+)))
+kable(checks, caption="#facttable", format.args = list(big.mark = ",", scientific=FALSE))
+```
+
+## Ensure availability and sustainable management of water and sanitation for all {#sdg6}
+
+More than 90 percent of the world’s people now have access to improved water sources. In the past 25 years 2.1 billion people gained access to improved sanitation facilities. At the same time the share of people practicing open
+defecation halved, from 27 percent to 13 percent. While such improvements show progress toward access for all, these measures do not capture all dimensions of providing water and sanitation. Goal 6 introduces a new, more comprehensive monitoring framework to ensure access that is safe, equitable, and universal.
+
+### Expanding access to drinking water and sanitation
+
+Until recently countries reported their populations’ access to water and sanitation by distinguishing between “improved” and “unimproved” coverage. In 2015, 663 million people were drinking from unimproved sources such as unprotected dug wells, and 2.4 billion lacked improved sanitation facilities. The bulk of those without were in Sub-Saharan Africa and South Asia (see figures 6d and 6e on page 34), where rural dwellers, especially the poorest, lagged behind others in access to both water and sanitation (figures 6a, 6b, 6f and 6g).
+
+```{r sdg6-wateraccess, echo=T, fig.width=10, fig.height=4, dpi=144, write.df="df", warning=FALSE, results='asis'}
+
+fig_sdg6_access_area <- function(
+  from = 1990, to = 2015,
+  rural_indicator = "SH.H2O.SAFE.RU.ZS", urban_indicator = "SH.H2O.SAFE.UR.ZS",
+  title = "The number of people without access to an improved water source is declining",
+  subtitle = "Number of people without access to an improved water source (billions)",
+  ylimits = NULL
+) {
+  indicators <- c(rural_indicator, urban_indicator,"SP.URB.TOTL", "SP.RUR.TOTL")
+  figure(
+    data = function() {
+      df <- wbgdata(country=wbgref$regions$iso3c, indicator=indicators, startdate=from, enddate=to)
+      df$rural <- (1 - df[[rural_indicator]]/100.0) * df$SP.RUR.TOTL
+      df$urban <- (1 - df[[urban_indicator]]/100.0) * df$SP.URB.TOTL
+      df[,indicators] <- NULL
+      df <- gather(df, "urbanrural", "no_access", rural, urban)
+      
+      df$iso3c <- ifelse(df$iso3c %in% c("MEA","LCN","ECS", "NAC"), "ZZZ", df$iso3c)
+      df$urbanrural <- ifelse(df$iso3c == "ZZZ", "combined", df$urbanrural)
+      df <- aggregate(no_access ~ date + iso3c + urbanrural, data=df, FUN=sum)
+      df
+    },
+    plot = function(df, style = style_atlas()) {
+      df$iso3c = factor(df$iso3c, levels = rev(c("SSF","SAS", "EAS","ZZZ")))
+      df$urbanrural = factor(df$urbanrural, levels = rev(c("combined", "rural", "urban")))
+      fill_values = comb_aes_values(df$iso3c, df$urbanrural, FUN=function(iso3c, urbanrural) {
+        style$colors[[if (urbanrural=="urban") "regions.dark" else "regions"]][[iso3c]]
+      }, not.found = "grey80")
+      
+      fill_labels = comb_aes_values(df$iso3c, df$urbanrural, FUN=function(iso3c, urbanrural) {
+        paste0(wbgref$regions$labels[[iso3c]],", ",urbanrural)
+      }, not.found = "Other regions, combined")
+      
+      ggplot(data = df, aes(x = as.numeric(date), y = no_access, fill = comb_aes(iso3c, urbanrural))) + 
+        geom_area(position="stack") +
+        scale_x_continuous(expand = c(0,0)) +
+        scale_y_continuous(limit = ylimits, labels = billions()) +
+        scale_fill_manual(
+          values=fill_values, 
+          labels=fill_labels
+        ) +
+        style$theme() +
+        theme(legend.position = "right", legend.justification = c(1,1))
+    },
+    title = title,
+    subtitle = subtitle,
+    source = paste("Source:", wbg_source(indicators))
+  )
+}
+figure_rmarkdown(fig_sdg6_access_area(ylimits = c(0, 1.5e9)), style_atlas_open(10))
+```
+
+```{r sdg6-saniaccess, echo=T, fig.width=10, fig.height=4, dpi=144, write.df="df", warning=FALSE, results='asis'}
+figure_rmarkdown(fig_sdg6_access_area(
+    rural_indicator = "SH.STA.ACSN.RU",
+    urban_indicator = "SH.STA.ACSN.UR",
+    title = "2.4 billion people still lack access to improved sanitation facilities",
+    subtitle = "Number of people without access to improved sanitation facilities (billions)",
+    ylimits = c(0, 3e9)
+  ), style_atlas_open(10)
+)
+```
+
+### Measuring access more comprehensively
+
+Goal 6 commits to universal access to water, sanitation, and hygiene under a new, broader, and more refined monitoring framework (targets 6.1 and 6.2). The unimproved–improved distinction is replaced by “safely managed” services. For water, this requires that the household’s drinking water source is on premises, available when needed, and free of fecal and locally relevant chemical contaminants. For sanitation, emphasis is on the links in the sanitation chain from initial defecation through waste management (including containment, disposal, and transport of human excreta), and on the availability of an appropriate handwashing facility. Monitoring these components and inequalities will help assess progress toward the longer term aim of universal access.
+
+Household surveys will increasingly measure these new components, but at present, data
+are limited. Available data show how the refined methodology can affect measures of access. For example, in Niger 66 percent of the population has access to an improved source of water, but new data show that only 10 percent have access on premises (figure 6c). Those without on-premise access must plan ahead to collect water, an exercise that can
+take up to 30 minutes (the threshold for “basic water”—another measure sometimes used) or even longer (improved, but not basic).
+
+Even if data are not yet available on all aspects of safely managed water, there generally is information on improved water on premises, and access to safely managed water can be no higher than that. On average across six countries, 60 percent of urban dwellers and 75 percent of rural dwellers previously classified as having access would now be considered to be without access. When other new requirements of access are considered, the shares are likely to fall further.^[The Water Supply, Sanitation, and Hygiene
+(WASH) Poverty Diagnostic has been working to
+examine the implications of adopting the new
+measurements of access.] These refined measures can help quantify major issues invisible in previous definitions.
+
+Incorporating handwashing in the definition of sanitation access has a similar impact. A 54-country study found that the handwashing criterion was unmet for between 4 percent (Serbia, and Bosnia and Herzegovina) and 99 percent (Liberia and Ethiopia) of the population.^[WHO/UNICEF Joint Monitoring Programme (JMP) for Water Supply and Sanitation, 2015, Progress on Sanitation and Drinking Water—2015 Update and MDG Assessment.] In another study of 10 countries, access to cleansing materials—fundamental to women for menstrual hygiene management—was below 25 percent in more than half the countries.^[Loughnan, L., Bain, R., Rop, R., Sommer, M., and Slaymaker, T. 2016. “What Can Existing Data on Water and Sanitation Tell Us About Menstrual Hygiene Management?” Waterlines 35(3).] Such data^[The most comprehensive assessment of the baseline global situation under these new measurements will be released by the World Health Organization/United Nations Children’s Fund Joint Monitoring Programme in 2017–18.] can give new insights to sanitation challenges facing different populations and enable countries and the international community to refine and focus service provision.^[World Bank WASH Poverty Diagnostic 2016.]
+
+```{r sdg6-newmeasure, echo=T, fig.width=10, fig.height=4, dpi=144, write.df="df", warning=FALSE, results='asis'}
+
+library(tidyr)
+library(ggiraph)
+
+fig_sdg6_newmeasure <- function() {figure(
+  data = function() {
+    df_wide <- data.frame(
+      iso3c = c("PAK","PSE","NGA","NER","COD","HTI"),
+      improved = c(89,62,61,67,51,65),
+      basic = c(87,62,45,46,37,55),
+      iwop = c(77,61,31,10,8,7)
+    )
+    df_wide$iso3c <- factor(df_wide$iso3c, df_wide$iso3c, ordered=T)
+
+    df <- gather(df_wide, access_type, value, improved, basic, iwop)
+    df$access_type <- factor(df$access_type, levels=c("improved", "basic", "iwop","safe"), labels=c("Improved water source","Basic water","Improved water on premises","(c) Safely managed water"), ordered=T)
+    df
+  },
+  plot = function(df, style = style_atlas()) {
+    ggplot(df, aes(x=iso3c, y=value, fill=access_type, tooltip=paste(value, '%'))) + 
+      geom_bar_interactive(width = 0.75,position=position_dodge(width=0.8), linetype="solid", stat="identity") +
+      scale_x_discrete(labels = wbgref$countries$labels) +
+      scale_fill_manual(values = c(style$colors$categorical[1:3],"white"), drop=F) +
+      scale_y_continuous(limits=c(0,100)) +
+      style$theme() +
+      theme(legend.direction = "horizontal", legend.position = "top", legend.title = element_blank())
+  },
+  title = "Under stricter definitions, fewer people have access to water",
+  subtitle = "Share of population at each access level, according to latest dataset, by country (%)",
+  note = "Notes: a. Differs from the WDI indicator SH.H2O.SAFE.ZS, which is based on multiple surveys. b. Improved water source, with no more than a 30-minute round-trip collection time. c. Safely managed water access has not yet been assessed and is not shown but can be no greater than improved water on premises.",
+  source = "Source: World Bank WASH Poverty Diagnostics 2016."
+)}
+
+
+fig <- fig_sdg6_newmeasure()
+figure_rmarkdown_ggiraph(
+  ggiraph(code = {figure_rmarkdown_fig(fig, style_atlas_open(10))},width=1,
+        width_svg = opts_current$get("fig.width"), height_svg = opts_current$get("fig.height"),
+        tooltip_opacity=1.0, tooltip_extra_css="background-color: white; border: 1px solid grey; padding: 7px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.3) 0 2px 10px;"
+  )
+)
+
+```
+
+```{r sdg6-watermap, echo=T, fig.width=10, fig.height=6, dpi=144, write.df="df", warning=FALSE, results='asis'}
+
+fig_sdg6_water_map <- function(
+  year = 2015,
+  indicator = "SH.H2O.SAFE.ZS",
+  title = "Those who lack improved water sources are concentratd largely in Sub-Saharan Africa"
+) {figure(
+    data = function() {
+      df <- wbgdata(country=wbgref$countries$iso3c, indicator=indicator, startdate=year, enddate=year, indicator.wide = FALSE)
+      df$bins <- supercut(
+          df$value,
+          c("[0,25)", "[25,50)", "[50,75)", "[75,100]"),
+          c("0-25", "25-50", "50-75", "75-100")
+        )
+      df
+    },
+    plot = function(df, style = style_atlas(), quality = "low", aspect_ratio = 1) {
+      maps <- wbgmaps[[quality]]
+      polys <- left_join(maps$countries, df, by=c("id" = "iso3c"))
+      polys$label <- gsub("'", "?", wbgref$countries$labels[polys$id], fixed = TRUE)
+      p <- ggplot() +
+        geom_polygon_interactive(data = polys, aes(long, lat, group = group, fill = bins, tooltip=paste(label,"=",value))) +
+        #geom_map(data = df, aes(map_id = iso3c, fill = bins), map = maps$countries) +
+        geom_polygon(data = maps$disputed, aes(long, lat, group = group, map_id = id), fill = "grey80") +
+        geom_polygon(data = maps$lakes, aes(long, lat, group = group), fill = "white") +
+        geom_path(data = maps$boundaries, aes(long, lat, group = group), color = "white", size = 0.2, lineend = maps$boundaries$lineend, linetype = maps$boundaries$linetype) +
+        scale_x_continuous(expand = c(0, 0), limits = standard_crop_wintri()$xlim) +
+        scale_y_continuous(expand = c(0, 0), limits = standard_crop_wintri()$ylim) +
+        scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", labels = wbggeo:::rename_na("No data")) +
+        coord_equal() +
+        style$theme() +
+        style$theme_map(aspect_ratio)
+      p
+      #pg <- wbg_color_disputed(p)
+      #pg
+    },
+#    theme = style_atlas()$theme(),
+    title = title,
+    subtitle = wbg_name(indicator),
+    source = paste("Source:", wbg_source(indicator))
+)}
+fig <- fig_sdg6_water_map()
+figure_rmarkdown_ggiraph(
+  ggiraph(code = {figure_rmarkdown_fig(fig, style_atlas_open(10))},width=1,
+        width_svg = opts_current$get("fig.width"), height_svg = opts_current$get("fig.height"),
+        tooltip_opacity=1.0, tooltip_extra_css="background-color: white; border: 1px solid grey; padding: 7px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.3) 0 2px 10px;"
+  )
+)
+```
+<script>HTMLWidgets.addPostRenderHandler(function() { $('[data-id="geom_xstripe_interactive"]').attr("class", "area_sensor") })</script>
+
+

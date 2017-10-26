@@ -1,9 +1,4 @@
-#' @import ggplot2 gtable grid magrittr extrafont
 #' @export
-theme_wbg <- function() {
-  theme_minimal()
-}
-
 style_base <- function(textsize=7) {
   list(
     labels = list(
@@ -64,50 +59,48 @@ style_base <- function(textsize=7) {
       theme(
         panel.grid = element_blank(),
         plot.margin=unit(c(0,0,0,0),"mm"),
-        axis.text = element_blank()
-      ) +
-        theme(
-          legend.position = c(0,0),
-          legend.direction = "vertical",
-          legend.justification = c(0, 0),
-        )
+        axis.text = element_blank(),
+        legend.position = c(0,0),
+        legend.direction = "vertical",
+        legend.justification = c(0, 0)
+      )
+    },
+    theme_barchart = function() {
+      theme(
+        axis.text.y = element_text(face="plain"),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = theme_minimal()$panel.grid.major.x
+      )
     }
   )
 }
 
 #' @export
-style_atlas <- function(textsize=7) {
+style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy") {
   modifyList(style_base(textsize), list(
     theme = function() {
-      theme_wbg() +
-        theme(text = element_text(family = "Avenir Book", size=textsize, color="grey10"),
+      theme_minimal() +
+        theme(text = element_text(family = family, size=textsize, color="grey10"),
               panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank(),
               panel.grid.minor.y = element_blank(),
-              #legend.position = "none",
               plot.caption=element_text(hjust=0, size=rel(0.9), margin=margin(1.5,0,0,0, unit="line"), lineheight = 1),
-              plot.title=element_text(hjust=0, size=rel(1.15), family="Avenir Heavy", face="bold", lineheight = 1),
+              plot.title=element_text(hjust=0, size=rel(1.15), family=family.bold, face="bold", lineheight = 1),
               plot.subtitle = element_text(hjust=0, size=rel(1.0), lineheight = 1),
               axis.text=element_text(size=rel(1.0)),
-              axis.text.y=element_text(family = "Avenir Heavy", face="bold"),
+              axis.text.y=element_text(family = family.bold, face="bold"),
               axis.text.x=element_text(face="plain"),
               axis.title=element_blank(),
               plot.margin=unit(c(5,5,5,0),"mm"),
               legend.title = element_blank(),
               legend.key.size = unit(1.5*textsize, "points"))
     },
-    theme_barchart = function() {
-      theme <- style_atlas(textsize)$theme()
-
-      theme + theme(
-        axis.text.y = element_text(face="plain"),
-        panel.grid.major.y = element_blank(),
-        panel.grid.major.x = theme_minimal()$panel.grid.major.x
-      )
-    },
-    colors = list(
+    colors = listy(
       spot.primary = "#cc0641",
       spot.secondary = "gray30",
-      spot.secondary.light = "gray90",
+      spot.primary.light = "#db8887",
+      spot.primary.dark = darken(spot.primary),
+      spot.secondary.light = lighten(spot.secondary),
+      spot.secondary.dark = lighten(spot.secondary),
       regions = c(
         EAS = rgb(223, 127, 46, maxColorValue = 255),
         ECS = rgb(206,18,73, maxColorValue = 255),
@@ -117,15 +110,17 @@ style_atlas <- function(textsize=7) {
         SAS = rgb(32, 120, 182, maxColorValue = 255),
         SSF = rgb(255, 203, 6, maxColorValue = 255)
       ),
+      regions.light = rgba2rgb(regions, alpha = 0.7, background = "white"),
+      regions.dark = rgba2rgb(regions, alpha = 0.7, background = "black"),
       categorical = c(
-        "#cc0641",
-        "#db8887",
+        spot.primary,
+        spot.primary.light,
         "#4d4d4c",
         "#9e9f9e",
         "#686868"
       ),
       world = "black",
-      continuous = function(n) { scales::seq_gradient_pal(low = "white", high = "#cc0641")((1:n)/n) }
+      continuous = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) }
     ),
     shapes = list(
       categorical = c(
@@ -140,10 +135,16 @@ style_atlas <- function(textsize=7) {
 }
 
 #' @export
+style_atlas_open <- function(textsize=7) {
+  style_atlas(textsize=textsize, family="Nunito Sans", family.bold = "Nunito Sans")
+}
+
+
+#' @export
 style_worldbank.org <- function(textsize=7) {
   modifyList(style_base(textsize), list(
     theme = function() {
-      theme_wbg() +
+      theme_minimal() +
         theme(text = element_text(family = "Open Sans", size = textsize, color="#333333"),
               panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank(),
               panel.grid.minor.y = element_blank(),
@@ -156,15 +157,6 @@ style_worldbank.org <- function(textsize=7) {
               axis.title=element_blank(),
               plot.margin=unit(c(5,5,5,0),"mm"),
               legend.title = element_blank())
-    },
-    theme_barchart = function() {
-      theme <- style_worldbank.org(textsize)$theme()
-
-      theme + theme(
-        axis.text.y = element_text(family = "Avenir", face="plain"),
-        panel.grid.major.y = element_blank(),
-        panel.grid.major.x = theme_minimal()$panel.grid.major.x
-      )
     },
     colors = list(
       spot.primary = "#0071bc",

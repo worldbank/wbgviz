@@ -1,16 +1,11 @@
 #' @export
-figure <- function(p, theme=NULL, aspect_ratio=2/1, ...) {
-  out <- list(plot = p, theme = theme, aspect_ratio = aspect_ratio, meta = list(...))
-  class(out) <- "wbgfigure"
-  out
-}
-
-#' @export
 #' @method print wbgfigure
-print.wbgfigure <- function(x) {
+print.wbgfigure <- function(x, ...) {
+  grid.newpage()
+  p <- x$plot(...)
   f <- add_captions(
-    x$plot,
-    if(is.null(x$theme)) x$plot$theme else x$theme,
+    p,
+    if(is.null(p$theme)) x$theme else p$theme,
     title = x$meta$title,
     subtitle = x$meta$subtitle,
     source = x$meta$source,
@@ -18,79 +13,83 @@ print.wbgfigure <- function(x) {
     source_url = x$meta$source_url,
     show.logo = TRUE
   )
-  #grid.newpage()
   grid.draw(f)
 }
 
+wbgfigure_parent <- ggplot2::ggproto("wbgfigure_parent",
+  data = function(self, refresh = FALSE) {
+    if (is.null(self$.cached_data) | refresh) {
+      self$.cached_data <- self$.data()
+    }
+    return(self$.cached_data)
+  },
+  plot = function(self, ...) {
+    self$.plot(self$data(), ...)
+  },
+  .data = function() {},
+  .plot = function(data, style) {}
+)
+
 #' @export
-figure_save_twitter <- function(fig, filename) {
-  png(filename, width = 1012, height = 506, res = 96*2)
-  f <- add_captions(
-    fig$plot,
-    if(is.null(fig$theme)) fig$plot$theme else fig$theme,
-#    title = fig$meta$title,
-#    subtitle = fig$meta$subtitle,
-    note = NULL,
-    source_url = paste0(fig$meta$source_url, if (is.null(fig$meta$note)) " - See link for source details." else "- See link for source details and notes."),
-    show.logo = TRUE
+figure <- function(data, plot, theme = NULL, aspect_ratio = 1,...) {
+  params = as.list(parent.frame())
+  ggproto("wbgfigure", wbgfigure_parent,
+          .data = data, .plot = plot,
+          params = params, theme = theme, aspect_ratio = aspect_ratio,
+          meta = list(...))
+}
+
+#' @export
+figure_rmarkdown_pre <- function(fig) {
+  paste0(
+    "<figure>\n",
+    "<figcaption class='figure title'>",htmltools::htmlEscape(fig$meta$title),"</figcaption>\n",
+    "<div class='figure subtitle'>",htmltools::htmlEscape(fig$meta$subtitle),"</div>"
   )
-  grid.draw(f)
-  dev.off()
 }
 
 #' @export
-figure_save_print_pdf <- function(fig, filename, width = 5, height = NULL, ...) {
-  if (is.null(height)) {
-    height <- width / fig$aspect_ratio
-  }
+figure_rmarkdown_fig <- function(fig, style) {
+  grid.newpage()
+  g <- ggplotGrob(fig$plot(style))
+  grid.draw(g)
+}
 
-  pdf(filename, width = width, height = height, ...)
-  f <- add_captions(
-    fig$plot,
-    if(is.null(fig$theme)) fig$plot$theme else fig$theme,
-    title = fig$meta$title,
-    subtitle = fig$meta$subtitle,
-    source = fig$meta$source,
-    note = fig$meta$note,
-    show.logo = FALSE
+#' @export
+figure_rmarkdown_post <- function(fig) {
+  paste0(
+    "<div class='figure note'>",htmltools::htmlEscape(fig$meta$note),"</div>\n",
+    "<div class='figure source'>",htmltools::htmlEscape(fig$meta$source),"</div>\n",
+    "</figure>"
   )
-  grid.draw(f)
-  dev.off()
-}
-
-#' @importFrom rvg dsvg
-#' @export
-figure_save_web_svg <- function(fig, filename, width = 5, height = NULL, metadata = TRUE, ...) {
-  if (is.null(height)) {
-    height <- width / fig$aspect_ratio
-  }
-
-  # Save plot
-  rvg::dsvg(filename, width = width, height = height, ...)
-  f <- add_captions(
-    fig$plot,
-    if(is.null(fig$theme)) fig$plot$theme else fig$theme,
-    show.logo = FALSE
-  )
-  grid.draw(f)
-  dev.off()
-
-  # Save metadata
-  meta <- jsonlite::toJSON(fig$meta, pretty=TRUE, auto_unbox = TRUE)
-  readr::write_file(meta, paste0(filename, ".meta.json"))
 }
 
 #' @export
-figure_save_web_png <- function(fig, filename, width = 1500/96/2, height = NULL, metadata = TRUE, ...) {
+figure_rmarkdown <- function(fig, style) {
+  cat(figure_rmarkdown_pre(fig))
+  figure_rmarkdown_fig(fig, style)
+  cat(figure_rmarkdown_post(fig))
+}
+
+#' @export
+figure_rmarkdown_ggiraph <- function(ggi) {
+  ggi <- htmlwidgets::prependContent(ggi,htmltools::HTML(figure_rmarkdown_pre(fig)))
+  ggi <- htmlwidgets::appendContent(ggi,htmltools::HTML(figure_rmarkdown_post(fig)))
+  ggi
+}
+
+#' @export
+figure_save_web_png <- function(fig, style, filename, width = 1500/96/2, height = NULL, metadata = TRUE, ...) {
   if (is.null(height)) {
     height <- width / fig$aspect_ratio
   }
 
   # Save plot
   png(filename, width = width, height = height, units = "in", res = 96*2, ...)
+  p <- fig$plot(style(12))
   f <- add_captions(
-    fig$plot,
-    if(is.null(fig$theme)) fig$plot$theme else fig$theme,
+    p,
+    if(is.null(fig$theme)) p$theme else fig$theme,
     show.logo = FALSE
   )
   grid.draw(f)
@@ -99,12 +98,69 @@ figure_save_web_png <- function(fig, filename, width = 1500/96/2, height = NULL,
   # Save metadata
   meta <- jsonlite::toJSON(fig$meta, pretty=TRUE, auto_unbox = TRUE)
   readr::write_file(meta, paste0(filename, ".meta.json"))
+
+  # Save data
+  data <- fig$data()
+  if (!is.data.frame(data)) {
+    { mapply(function(d, n) { write.csv(d, paste0(filename, "_",n,".csv")) }, data, names(data)) }
+  } else {
+    write.csv(data, paste0(filename, ".csv"))
+  }
 }
 
 #' @export
-figure_save_allformats <- function(fig, basename, style=style_atlas) {
-  figure_save_twitter(fig(style()), paste0(basename, "_twitter.png"))
-  figure_save_print_pdf(fig(style()), paste0(basename, ".pdf"))
-  figure_save_web_svg(fig(style(10)), paste0(basename, ".svg"))
-  figure_save_web_png(fig(style(10)), paste0(basename, ".png"))
-}
+figure_demo <- function(N = 10, from = 2011, to = 2015) {figure(
+  data = function(self) {
+    df <- wbgdata(
+      country = wbgref$countries$iso3c,
+      indicator = c("SE.SEC.NENR.MA", "SE.SEC.NENR.FE"),
+      startdate = from, enddate = to
+    )
+
+    # Get the most recent year for each country
+    df <- df %>%
+      filter(complete.cases(.)) %>%
+      group_by(iso3c) %>%
+      filter(date == max(date)) %>%
+      ungroup()
+
+    # Find the top N countries by gap, but order by FE
+    bottom <- df %>%
+      arrange(SE.SEC.NENR.MA - SE.SEC.NENR.FE) %>%
+      tail(N) %>%
+      arrange(-SE.SEC.NENR.FE) %>%
+      pull(iso3c)
+
+    # Reorder & reshape for ggplotting
+    df.long <- df %>%
+      filter(iso3c %in% bottom) %>%
+      mutate(iso3c = factor(iso3c, levels = bottom)) %>%
+      tidyr::gather(indicatorID, value, SE.SEC.NENR.FE, SE.SEC.NENR.MA)
+
+    df.long
+  },
+  plot = function(data, style = style_atlas()) {
+    labeller <- function(c) {
+      paste0(
+        wbgref$countries$labels[c],
+        " (", data$date[match(c, data$iso3c)], ")"
+      )
+    }
+    ggplot(data, aes(x = iso3c, y = value, fill=indicatorID)) +
+      geom_col(position = "bullet") +
+      scale_fill_manual(values = style$colors$categorical, labels = c("Female", "Male")) +
+      scale_x_discrete(labels = labeller) +
+      scale_y_continuous(labels = round, expand = c(0, 0), limits = c(0, 100)) +
+      coord_flip() +
+      style$theme() +
+      style$theme_barchart() +
+      theme(legend.position = c(1,1), legend.justification = c(1,1), legend.direction = "horizontal")
+  },
+  title = "The countries with the largest enrolment gender gaps are mostly low income, with one surprising exception.",
+  subtitle = paste0("Net enrolment rate, secondary (%), most recent year in ",from,"–",to),
+  note = paste0("Note:", N, " countries with largest gap between male and female enrolment, ordered by female enrolment (low to high)"),
+  source = paste("Source:",wbg_source("SE.SEC.NENR")),
+  source_url = "http://datatopics.worldbank.org/sdgatlas/SDG-04-quality-education.html",
+  aspect_ratio = 20/N
+)}
+

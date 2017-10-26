@@ -1,0 +1,65 @@
+---
+title: "Why (R) Markdown?"
+author: "Andrew Whitby"
+date: "4 April 2017"
+output: ioslides_presentation
+runtime: shiny
+---
+
+## Authoring process
+
+### Traditional
+
+1. Download data from databank
+2. Do analysis in Excel
+3. Draft charts in Excel
+4. Write text in Word
+5. Style (& probably remake figures)
+
+## Authoring process
+
+### R Markdown
+
+1. Access data from API if possible
+2. Write analysis code in R
+3. Output charts in R (ggplot)
+4. Write text in Markdown
+5. Style
+
+## What is markdown?
+
+Markdown (a play on 'markup')
+
+## Interactive bit
+
+```{r, echo=FALSE}
+inputPanel(
+  selectInput("n_breaks", label = "Number of bins:",
+              choices = c(10, 20, 35, 50), selected = 20),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 0.2, max = 2, value = 1, step = 0.2)
+)
+
+renderPlot({
+  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
+       xlab = "Duration (minutes)", main = "Geyser eruption duration")
+  
+  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
+  lines(dens, col = "blue")
+})
+```
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Slide with R Code and Output
+
+```{r}
+summary(cars)
+```
+
+
