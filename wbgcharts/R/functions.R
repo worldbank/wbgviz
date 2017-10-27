@@ -254,9 +254,9 @@ interleave_panels_horizontal <- function(
 
   # TODO styles don't carry over still
   plot_titles <- lapply(pgs, function(pg) {
-    getGrob(pg, gPath("title", "GRID.text"), grep=T)
+    getGrob(pg, gPath("title\\.", "GRID.text"), grep=T)
   })
-  panel_titles <- as.list(getGrob(pgs[[1]], gPath("GRID.stripGrob"), grep=T, global=T))
+  panel_titles <- as.list(getGrob(pgs[[1]], gPath("GRID.titleGrob"), grep=T, global=T))
 
   chart <- gtable(
     unit.c(ylabels$width, unit(rep_len(width.ratio,panel_count*plot_count), "null")),

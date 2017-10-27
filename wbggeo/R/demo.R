@@ -13,6 +13,7 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
     style$theme_map(aspect_ratio)
 
   pg <- wbg_color_disputed(p)
+  pg$theme <- style$theme()
   pg
 }
 
@@ -55,7 +56,7 @@ wbggeo_demo_atlas_5g_choropleth <- function(year = 2016) {
         df, wbgmaps[[quality]], style, "SG.GEN.PARL.ZS", aspect_ratio = aspect_ratio
       )
     },
-    theme = style$theme(),
+#    theme = style$theme(),
     aspect_ratio = 5/4,
     title = "Women remain underrepresented in national parliaments in most countries.",
     subtitle = paste0(wbg_name(indicator), ", ", year),
@@ -79,7 +80,7 @@ wbggeo_demo_atlas_6h_bubble <- function(year = 2014) {
         df, wbgmaps[[quality]], style, "count", breaks, aspect_ratio = aspect_ratio, max_size = 0.7, labels = millions()
       )
     },
-    theme = style_atlas()$theme(),
+#    theme = style_atlas()$theme(),
     aspect_ratio = 5/4,
     title = "Open defecation is widespread throughout parts of South Asia and Sub-Saharan Africa",
     subtitle = paste0("Number of people practicing open defecation, ", year),

@@ -20,5 +20,8 @@ Imports: ggplot2,
     digest,
     rappdirs
 Suggests: png,
-    extrafont
+    extrafont,
+    knitr,
+    rmarkdown
 Depends: ggplot2
+VignetteBuilder: knitr

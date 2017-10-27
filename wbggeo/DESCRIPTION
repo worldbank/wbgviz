@@ -2,7 +2,8 @@ Package: wbggeo
 Type: Package
 Title: Geospatial dataviz for World Bank Group
 Version: 0.1.0
-Author: Who wrote it
+Authors@R: person("Andrew", "Whitby", email = "awhitby@worldbank.org",
+                  role = c("aut", "cre"))
 Maintainer: Andrew Whitby <awhitby@worldbank.org>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
@@ -13,5 +14,8 @@ RoxygenNote: 6.0.1
 Imports: ggplot2,
     dplyr,
     wbgcharts
-Suggests: wbgmaps
+Suggests: wbgmaps,
+    knitr,
+    rmarkdown
 Depends: wbgcharts
+VignetteBuilder: knitr

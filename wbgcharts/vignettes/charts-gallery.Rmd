@@ -1,0 +1,51 @@
+---
+title: "Charts Gallery for wbgcharts"
+author: "Andrew Whitby"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Charts Gallery}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Note: on a retina display, these maps will appear poor quality. This is just
+because rmarkdown vignettes don't use retina output by default.
+
+```{r, results='asis'}
+library(ggplot2)
+library(wbgcharts)
+```
+
+```{r, fig.show='hold', dpi=72, fig.width=4.5, fig.height=4.5}
+print(wbgcharts_demo_region_cols(), style_atlas(11))
+print(wbgcharts_demo_region_bars(), style_atlas(11))
+```
+
+```{r, fig.show='hold', fig.width=9, fig.height=5, dpi=72}
+print(wbgcharts_demo_bullets(), style_atlas(11))
+print(wbgcharts_demo_bullets(), style_worldbank.org(11))
+```
+
+```{r, fig.show='hold', fig.width=9, fig.height=5, dpi=72}
+print(wbgcharts_demo_atlas_2a_stackedarea(), style_atlas(11))
+print(wbgcharts_demo_atlas_2b_dot(), style_atlas(11))
+```
+
+
+```{r, fig.show='hold', fig.width=9, fig.height=5, dpi=72, warning=FALSE}
+print(wbgcharts_demo_atlas_1a_panel(), style_atlas(11))
+print(wbgcharts_demo_atlas_4k_area_panels(), style_atlas(11))
+```
+
+```{r, fig.show='hold', fig.width=6, fig.height=9, dpi=72, warning=FALSE}
+print(wbgcharts_demo_atlas_6f_dot(), style_atlas(11))
+```
+
+```{r, fig.show='hold', fig.width=9, fig.height=9, dpi=72, warning=FALSE}
+print(wbgcharts_demo_atlas_8c_scatter(), style_atlas(11))
+```
+
+```{r, fig.show='hold', fig.width=4.5, fig.height=4.5, dpi=72, warning=FALSE}
+print(wbgcharts_demo_atlas_17c_line(), style_atlas(11))
+```

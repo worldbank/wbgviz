@@ -1,0 +1,25 @@
+---
+title: "Maps Gallery for wbggeo"
+author: "Andrew Whitby"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Maps Gallery}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Note: on a retina display, these maps will appear poor quality. This is just
+because rmarkdown vignettes don't use retina output by default.
+
+```{r, results='asis'}
+library(ggplot2)
+library(wbgcharts)
+library(wbgmaps)
+library(wbggeo)
+```
+
+```{r, dpi=72, fig.width=9, fig.height=7, warning=FALSE, message=FALSE}
+print(wbggeo_demo_atlas_5g_choropleth(), style_atlas(11))
+print(wbggeo_demo_atlas_6h_bubble(), style_atlas(11))
+```
