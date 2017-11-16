@@ -2,6 +2,14 @@
 
 REFRESH_PERIOD_DAYS <- 30
 
+wburls.v2 <- function ()
+{
+  base_url <- "http://api.worldbank.org/v2/"
+  utils_url <- "per_page=20000&format=json"
+  url_list <- list(base_url = base_url, utils_url = utils_url)
+  url_list
+}
+
 #' @export
 get_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts")) {
   msg_to_update <- "Countries/series cache is stale - use refresh_wbcache() to update."
@@ -47,7 +55,8 @@ create_wbgref <- function() {
     iso3c = countries_df$iso3c,
     labels = setNames(countries_df$country, countries_df$iso3c),
     iso2to3 = countries_df %>% select(iso2c, iso3c),
-    regions = countries_df %>% select(iso3c, region_iso3c = regionID)
+    regions = countries_df %>% select(iso3c, region_iso3c = regionID),
+    incomegroups = countries_df %>% select(iso3c, income_iso3c = incomeID)
   )
 
   regions_df <- wb_newcache$countries %>%
@@ -58,6 +67,16 @@ create_wbgref <- function() {
     iso3c = regions_df$iso3c,
     labels = setNames(regions_df$country, regions_df$iso3c),
     iso2to3 = regions_df[,c("iso2c", "iso3c")]
+  )
+
+  incomes_df <- wb_newcache$countries %>%
+    filter(iso3c %in% c("HIC", "UMC", "LMC", "LIC"))
+
+  wbgref$incomes <- list(
+    iso2c = incomes_df$iso2c,
+    iso3c = incomes_df$iso3c,
+    labels = setNames(incomes_df$country, incomes_df$iso3c),
+    iso2to3 = incomes_df[,c("iso2c", "iso3c")]
   )
 
   wbgref$all_geo <- list(
@@ -159,8 +178,21 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, ...,
   df
 }
 
-
+#' Build a source string for World Bank indicators
+#'
+#' \code{wbg_source} builds a source string for a set of indicators.
+#'
+#' For each indicator, it takes the source from the API metadata, then extracts the
+#' part leading up to the first period (.), which is usually useable as a short
+#' source. These are then combined into a single string
+#'
+#' Since population-related indicators are commonly included as references, this
+#' function excludes them from source string construction.
+#'
+#' @param indicatorIDs a vector of indicator IDs (SETS codes)
+#'
 #' @export
+#'
 wbg_source <- function(indicatorIDs) {
   wdi_ind <- get_wbcache()$indicators
 

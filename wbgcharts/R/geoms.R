@@ -30,6 +30,7 @@ trillions = label_divide(12)
 
 # = Pretty simple "compound" geoms =============================================
 
+#' TODO: option to only line adjacent areas with same fill
 #' @export
 geom_lined_area <- function(color = "white", size = 0.35, ...) {
   c(

@@ -110,6 +110,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         SAS = rgb(32, 120, 182, maxColorValue = 255),
         SSF = rgb(255, 203, 6, maxColorValue = 255)
       ),
+      world = c(WLD = "black"),
       regions.light = rgba2rgb(regions, alpha = 0.7, background = "white"),
       regions.dark = rgba2rgb(regions, alpha = 0.7, background = "black"),
       categorical = c(
@@ -119,7 +120,6 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         "#9e9f9e",
         "#686868"
       ),
-      world = "black",
       continuous = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) }
     ),
     shapes = list(
@@ -130,6 +130,18 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         1,
         1
       )
+    ),
+    linetypes = list(
+      regions = c(
+        EAS = "solid",
+        ECS = "solid",
+        LCN = "solid",
+        MEA = "solid",
+        NAC = "solid",
+        SAS = "solid",
+        SSF = "solid"
+      ),
+      world = c(WLD = "12")
     )
   ))
 }

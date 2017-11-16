@@ -101,7 +101,14 @@ figure_rmarkdown_pre <- function(fig) {
 #' @export
 figure_rmarkdown_fig <- function(fig, style) {
   grid.newpage()
-  g <- ggplotGrob(fig$plot(style))
+  plot <- fig$plot(style)
+  if ("ggplot" %in% class(plot)) {
+    g = ggplotGrob(plot)
+  } else if ("grob" %in% class(plot)) {
+    g = plot
+  } else {
+    stop("Don't know how to deal with object of class", class(plot))
+  }
   grid.draw(g)
 }
 
@@ -126,6 +133,28 @@ figure_rmarkdown_ggiraph <- function(ggi) {
   ggi <- htmlwidgets::prependContent(ggi,htmltools::HTML(figure_rmarkdown_pre(fig)))
   ggi <- htmlwidgets::appendContent(ggi,htmltools::HTML(figure_rmarkdown_post(fig)))
   ggi
+}
+
+#' @export
+figure_save_draft_png <- function(fig, style, filename, width = 1500/96/2, height = NULL, metadata = TRUE, ...) {
+  if (is.null(height)) {
+    height <- width / fig$aspect_ratio
+  }
+
+  # Save plot
+  png(filename, width = width, height = height, units = "in", res = 96*2, ...)
+  p <- fig$plot(style())
+  f <- add_captions(
+    p,
+    if(is.null(fig$theme)) p$theme else fig$theme,
+    title = fig$meta$title,
+    subtitle = fig$meta$subtitle,
+    note = fig$meta$note,
+    source = fig$meta$source,
+    show.logo = FALSE
+  )
+  grid.draw(f)
+  dev.off()
 }
 
 #' @export
