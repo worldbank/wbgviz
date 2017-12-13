@@ -23,3 +23,4 @@ devtools::install_github("worldbank/wbgviz", subdir = "wbgcharts", auth_token = 
 devtools::install_github("worldbank/wbgviz", subdir = "wbggeo", auth_token = "[SECRET]")
 devtools::install_github("worldbank/wbgviz", subdir = "wbgmaps", auth_token = "[SECRET]")
 ```
+Note that by default `install_github` does not create vignettes - you can enable this by adding an argument `build_vignettes = TRUE` to each of the three above commands. Then you can view the vignettes included in a package by e.g. `vignette(package="wbgcharts")`.
