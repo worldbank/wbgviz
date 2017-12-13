@@ -70,13 +70,25 @@ create_wbgref <- function() {
   )
 
   incomes_df <- wb_newcache$countries %>%
-    filter(iso3c %in% c("HIC", "UMC", "LMC", "LIC"))
+    filter(iso3c %in% c("HIC", "UMC", "LMC", "LIC")) %>%
+    arrange(match(iso3c, c("HIC", "UMC", "LMC", "LIC")))
 
   wbgref$incomes <- list(
     iso2c = incomes_df$iso2c,
     iso3c = incomes_df$iso3c,
     labels = setNames(incomes_df$country, incomes_df$iso3c),
     iso2to3 = incomes_df[,c("iso2c", "iso3c")]
+  )
+
+  incomes3_df <- wb_newcache$countries %>%
+    filter(iso3c %in% c("HIC", "MIC", "LIC")) %>%
+    arrange(match(iso3c, c("HIC", "MIC", "LIC")))
+
+  wbgref$incomes3 <- list(
+    iso2c = incomes3_df$iso2c,
+    iso3c = incomes3_df$iso3c,
+    labels = setNames(incomes3_df$country, incomes3_df$iso3c),
+    iso2to3 = incomes3_df[,c("iso2c", "iso3c")]
   )
 
   wbgref$all_geo <- list(

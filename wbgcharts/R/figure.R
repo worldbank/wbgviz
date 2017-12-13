@@ -19,7 +19,11 @@ print.wbgfigure <- function(x, ...) {
 wbgfigure_parent <- ggplot2::ggproto("wbgfigure_parent",
   data = function(self, refresh = FALSE) {
     if (is.null(self$.cached_data) | refresh) {
-      self$.cached_data <- self$.data()
+      if (is.function(self$.data)) {
+        self$.cached_data <- self$.data()
+      } else {
+        self$.cached_data <- self$.data
+      }
     }
     return(self$.cached_data)
   },
@@ -136,13 +140,13 @@ figure_rmarkdown_ggiraph <- function(ggi) {
 }
 
 #' @export
-figure_save_draft_png <- function(fig, style, filename, width = 1500/96/2, height = NULL, metadata = TRUE, ...) {
+figure_save_draft_png <- function(fig, style, filename, width = 1500/96/2, height = NULL, res = 96*2, metadata = TRUE, ...) {
   if (is.null(height)) {
     height <- width / fig$aspect_ratio
   }
 
   # Save plot
-  png(filename, width = width, height = height, units = "in", res = 96*2, ...)
+  png(filename, width = width, height = height, units = "in", res = res, ...)
   p <- fig$plot(style())
   f <- add_captions(
     p,
