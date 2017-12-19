@@ -159,6 +159,12 @@ figure_save_draft_png <- function(fig, style, filename, width = 1500/96/2, heigh
   )
   grid.draw(f)
   dev.off()
+
+  # Mogrify plot to record resolution, for better Office imports, etc.
+  retval <- system2("mogrify", c("-density 192", "-units pixelsperinch",filename))
+  if (retval != 0) {
+    warning("Failed to successfully run mogrify (perhaps you don't have imagemagick installed?). Saved PNG will not have resolution metadata.")
+  }
 }
 
 #' @export
