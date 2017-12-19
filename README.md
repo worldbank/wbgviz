@@ -32,3 +32,9 @@ To use styles, you need to have font dependencies. One (Avenir) is a commerical 
 install.packages("extrafont")
 font_import(system.file("fonts", package = "wbgcharts"))
 ```
+
+You will probably need to install them at the OS level too. Usually this is by opening the path printed by
+```
+system.file("fonts", package = "wbgcharts")
+```
+then double clicking or right clicking on the fonts there.
