@@ -24,3 +24,11 @@ devtools::install_github("worldbank/wbgviz", subdir = "wbggeo", auth_token = "[S
 devtools::install_github("worldbank/wbgviz", subdir = "wbgmaps", auth_token = "[SECRET]")
 ```
 Note that by default `install_github` does not create vignettes - you can enable this by adding an argument `build_vignettes = TRUE` to each of the three above commands. Then you can view the vignettes included in a package by e.g. `vignette(package="wbgcharts")`.
+
+## Font installation
+
+To use styles, you need to have font dependencies. One (Avenir) is a commerical license so we can't distribute with the package. However `style_atlas_open` and `style_worldbank.org` use open fonts that can be installed using:
+```
+install.packages("extrafont")
+font_import(system.file("fonts", package = "wbgcharts"))
+```
