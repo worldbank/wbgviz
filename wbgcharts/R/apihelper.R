@@ -132,9 +132,16 @@ wbgdata_build_cache_filename <- function(country, indicator, startdate, enddate)
 }
 
 #' @export
-wbgdata <-function(country = "all", indicator, startdate, enddate, ...,
+wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
                    col.indicator = FALSE, cache = get_wbcache(),
                    indicator.wide = TRUE, removeNA = FALSE, offline="none") {
+  if (!missing(years)) {
+    if (!missing(startdate) | !missing(enddate)) {
+      stop("Provide either years or (startdate and enddate) but not both.")
+    }
+    startdate <- min(years)
+    enddate <- max(years)
+  }
   offline_path <- ".wbgdata"
   if (offline != "none") {
     offline_file <- file.path(offline_path, wbgdata_build_cache_filename(country, indicator, startdate, enddate))
@@ -181,6 +188,10 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, ...,
     } else if (offline == "none") {
       # nothing
     }
+  }
+
+  if (!missing(years)) {
+    df <- df %>% filter(date %in% years)
   }
 
   if (indicator.wide) {
