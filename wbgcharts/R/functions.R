@@ -201,6 +201,11 @@ add_captions <- function(plot, theme, title = NULL, subtitle = NULL, note = NULL
     stop("Don't know how to deal with object of class", class(plot))
   }
 
+  # If we add the padding in the main gtable it can break the wrapping
+  # as it will not be accounted for (this is complex). So we add it via
+  # the viewpoint.
+  vp <- viewport(width = unit(1 - 0.025*2, "npc"), height = unit(1 - 0.025*2, "npc"))
+
   # FIXME: incorporate extra space into elements not here
   figure <- gtable(
     unit.c(unit(1, "null"), grobWidth(grob_logo$children[[1]])),
@@ -211,7 +216,8 @@ add_captions <- function(plot, theme, title = NULL, subtitle = NULL, note = NULL
       grobHeight(grid.force(grob_note))+unit(0.1*!is.null(note), "in"),
       grobHeight(grob_source)+unit(0.1*!is.null(source), "in"),
       max(grobHeight(grob_source_url), grobHeight(grob_logo$children[[1]]))
-    )
+    ),
+    vp = vp
   ) %>%
     gtable_add_grob(grob_title, 1, 1, 1, 2) %>%
     gtable_add_grob(grob_subtitle, 2, 1, 2, 2) %>%
@@ -219,8 +225,7 @@ add_captions <- function(plot, theme, title = NULL, subtitle = NULL, note = NULL
     gtable_add_grob(grob_note, 4, 1, 4, 2) %>%
     gtable_add_grob(grob_source, 5, 1, 5, 2) %>%
     gtable_add_grob(grob_source_url, 6, 1, clip="on") %>%
-    gtable_add_grob(grob_logo, 6, 2, clip="on") %>%
-    gtable_add_padding(unit(0.025, "npc"))
+    gtable_add_grob(grob_logo, 6, 2, clip="on")
 
   #gtable_show_layout(figure)
   #stop()
