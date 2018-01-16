@@ -97,10 +97,10 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
     colors = listy(
       spot.primary = "#cc0641",
       spot.secondary = "gray30",
-      spot.primary.light = "#db8887",
+      spot.primary.light = lighten(spot.primary),
       spot.primary.dark = darken(spot.primary),
       spot.secondary.light = lighten(spot.secondary),
-      spot.secondary.dark = lighten(spot.secondary),
+      spot.secondary.dark = darken(spot.secondary),
       regions = c(
         EAS = rgb(223, 127, 46, maxColorValue = 255),
         ECS = rgb(206,18,73, maxColorValue = 255),
@@ -145,6 +145,40 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
     )
   ))
 }
+
+# '@export
+style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy") {
+  modifyList(style_atlas(textsize, family, family.bold), list(
+    colors = listy(
+      spot.primary = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #"#cc0641",
+      spot.secondary = cmyk(0, 0, 0, 80, maxColorValue = 100),
+      spot.primary.light = cmyk(1.3, 50, 29.3, 6.1, maxColorValue = 100),
+      spot.primary.dark = darken(spot.primary),
+      spot.secondary.light = cmyk(0, 0, 0, 50, maxColorValue = 100),
+      spot.secondary.dark = lighten(spot.secondary),
+      regions = c(
+        EAS = cmyk(0, 55, 90, 10, maxColorValue = 100), #rgb(223, 127, 46, maxColorValue = 255),
+        ECS = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #rgb(206,18,73, maxColorValue = 255),
+        LCN = cmyk(72, 5, 100, 20, maxColorValue = 100), #rgb(58,148,60, maxColorValue = 255),
+        MEA = cmyk(45, 83, 0, 20, maxColorValue = 100), #rgb(127, 62, 131, maxColorValue = 255),
+        NAC = cmyk(0, 0, 0, 80, maxColorValue = 100), #rgb(77, 77, 76, maxColorValue = 255),
+        SAS = cmyk(80, 40, 0, 10, maxColorValue = 100), #rgb(32, 120, 182, maxColorValue = 255),
+        SSF = cmyk(0, 20, 100, 0, maxColorValue = 100) #rgb(255, 203, 6, maxColorValue = 255)
+      ),
+      world = c(WLD = "black"),
+      regions.light = rgba2rgb(regions, alpha = 0.7, background = "white"),
+      regions.dark = rgba2rgb(regions, alpha = 0.7, background = "black"),
+      categorical = c(
+        spot.primary,
+        spot.primary.light,
+        "#4d4d4c",
+        "#9e9f9e",
+        "#686868"
+      ),
+      continuous = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) }
+    )))
+}
+
 
 #' @export
 style_atlas_open <- function(textsize=7) {

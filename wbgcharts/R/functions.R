@@ -295,6 +295,16 @@ current_aspect_ratio <- function() {
   )
 }
 
+#' Convert CMYK percentages to RGB in the simplest way
+#'
+#' @export
+cmyk <- function(c, m, y, k, maxColorValue = 1.0) {
+  r = (1-c/maxColorValue) * (1-k/maxColorValue)
+  g = (1-m/maxColorValue) * (1-k/maxColorValue)
+  b = (1-y/maxColorValue) * (1-k/maxColorValue)
+  rgb(r, g, b, alpha = 1)
+}
+
 #' Convert an RGBA color to RGB by combining with a background color
 #'
 #' @param color a color or vector of colors

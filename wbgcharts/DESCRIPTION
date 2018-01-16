@@ -9,7 +9,7 @@ Description: Themes, extra geoms and post-production finishing tools for use wit
 License: MIT
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 Imports: ggplot2,
     grid,
     gtable,

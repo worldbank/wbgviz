@@ -158,7 +158,10 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
   } else {
     df <- wbstats::wb(country, indicator, startdate, enddate, removeNA = removeNA, cache = cache,...)
 
-    df <- df %>% left_join(wbgref$all_geo$iso2to3, by = "iso2c")
+    if (!("iso3c" %in% colnames(df))) {
+      # Older versions of wbstats don't return, newer ones do
+      df <- df %>% left_join(wbgref$all_geo$iso2to3, by = "iso2c")
+    }
     if (!col.indicator)
       df <- df %>% select(-indicator)
     df <- df %>% select(-iso2c, -country)
