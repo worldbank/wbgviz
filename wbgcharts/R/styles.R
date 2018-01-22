@@ -113,6 +113,12 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
       world = c(WLD = "black"),
       regions.light = rgba2rgb(regions, alpha = 0.7, background = "white"),
       regions.dark = rgba2rgb(regions, alpha = 0.7, background = "black"),
+      incomes = c(
+        HIC = spot.primary,
+        UMC = spot.primary.light,
+        LMC = spot.secondary.light,
+        LIC = spot.secondary
+      ),
       categorical = c(
         spot.primary,
         spot.primary.light,
@@ -150,7 +156,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
 style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy") {
   modifyList(style_atlas(textsize, family, family.bold), list(
     colors = listy(
-      spot.primary = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #"#cc0641",
+      spot.primary = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #"#https://data.worldbank.org/indicator/SH.STA.STNT.MA.ZS?locations=BD",
       spot.secondary = cmyk(0, 0, 0, 80, maxColorValue = 100),
       spot.primary.light = cmyk(1.3, 50, 29.3, 6.1, maxColorValue = 100),
       spot.primary.dark = darken(spot.primary),

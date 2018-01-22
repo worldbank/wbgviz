@@ -53,7 +53,7 @@ create_wbgref <- function() {
   wbgref$countries <- list(
     iso2c = countries_df$iso2c,
     iso3c = countries_df$iso3c,
-    labels = setNames(countries_df$country, countries_df$iso3c),
+    labels = setNames(trimws(countries_df$country), countries_df$iso3c),
     iso2to3 = countries_df %>% select(iso2c, iso3c),
     regions = countries_df %>% select(iso3c, region_iso3c = regionID),
     incomegroups = countries_df %>% select(iso3c, income_iso3c = incomeID)
@@ -65,7 +65,7 @@ create_wbgref <- function() {
   wbgref$regions <- list(
     iso2c = regions_df$iso2c,
     iso3c = regions_df$iso3c,
-    labels = setNames(regions_df$country, regions_df$iso3c),
+    labels = setNames(trimws(regions_df$country), regions_df$iso3c),
     iso2to3 = regions_df[,c("iso2c", "iso3c")]
   )
 
@@ -76,7 +76,7 @@ create_wbgref <- function() {
   wbgref$incomes <- list(
     iso2c = incomes_df$iso2c,
     iso3c = incomes_df$iso3c,
-    labels = setNames(incomes_df$country, incomes_df$iso3c),
+    labels = setNames(trimws(incomes_df$country), incomes_df$iso3c),
     iso2to3 = incomes_df[,c("iso2c", "iso3c")]
   )
 
@@ -87,14 +87,14 @@ create_wbgref <- function() {
   wbgref$incomes3 <- list(
     iso2c = incomes3_df$iso2c,
     iso3c = incomes3_df$iso3c,
-    labels = setNames(incomes3_df$country, incomes3_df$iso3c),
+    labels = setNames(trimws(incomes3_df$country), incomes3_df$iso3c),
     iso2to3 = incomes3_df[,c("iso2c", "iso3c")]
   )
 
   wbgref$all_geo <- list(
     iso2c = wb_newcache$countries$iso2c,
     iso3c = wb_newcache$countries$iso3c,
-    labels = setNames(wb_newcache$countries$country, wb_newcache$countries$iso3c),
+    labels = setNames(trimws(wb_newcache$countries$country), wb_newcache$countries$iso3c),
     iso2to3 = wb_newcache$countries[,c("iso2c", "iso3c")]
   )
 

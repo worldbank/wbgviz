@@ -9,16 +9,18 @@ dp <- Vectorize(function(x) {
   }
 })
 
-label_divide <- function(scale) {
+label_divide <- function(scale, big.mark = ",") {
   function(precision = NULL) {
     function(label) {
       scaled_values <- label / (10^scale)
       digits <- if (is.null(precision)) max(dp(scaled_values), na.rm = TRUE) else precision
-      format(round(scaled_values, digits = digits), nsmall = digits)
+      format(round(scaled_values, digits = digits), nsmall = digits, scientific = FALSE, big.mark = big.mark)
     }
   }
 }
 
+#' @export
+ones = label_divide(0)
 #' @export
 thousands = label_divide(3)
 #' @export
