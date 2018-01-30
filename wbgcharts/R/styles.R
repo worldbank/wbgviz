@@ -71,6 +71,35 @@ style_base <- function(textsize=7) {
         panel.grid.major.y = element_blank(),
         panel.grid.major.x = theme_minimal()$panel.grid.major.x
       )
+    },
+    theme_scatter = function() {
+      theme(
+        axis.title.x = element_text(margin = margin(1,0,0,0,"lines")),
+        panel.grid.major.x = NULL
+      )
+    },
+    theme_legend = function(position = "top") {
+      listy(
+        top = theme(
+          legend.position = "top",
+          legend.margin = margin(0,0,0.3,0, "lines")
+        ),
+        topleft = top + theme(legend.justification = c(0, 0.5)),
+        right = theme(
+          legend.position = "right",
+          legend.margin = margin(0,0,0,0.5, "lines")
+        ),
+        righttop = right + theme(legend.justification = c(0.5, 1)),
+        bottom = theme(
+          legend.position = "bottom",
+          legend.margin = margin(0.3,0,0,0, "lines")
+        ),
+        left = theme(
+          legend.position = "left",
+          legend.margin = margin(0,0.5,0,0, "lines")
+        ),
+        lefttop = left + theme(legend.justification = c(0.5, 1))
+      )[position]
     }
   )
 }
@@ -83,18 +112,27 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         theme(text = element_text(family = family, size=textsize, color="grey10"),
               panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank(),
               panel.grid.minor.y = element_blank(),
-              plot.caption=element_text(hjust=0, size=rel(0.9), margin=margin(1.5,0,0,0, unit="line"), lineheight = 1),
+              plot.caption=element_text(hjust=0, size=rel(0.9), margin=margin(1.5,0,0,0, unit="line"), lineheight = 1, color = "grey70"),
               plot.title=element_text(hjust=0, size=rel(1.15), family=family.bold, face="bold", lineheight = 1),
               plot.subtitle = element_text(hjust=0, size=rel(1.0), lineheight = 1),
               axis.text=element_text(size=rel(1.0)),
               axis.text.y=element_text(family = family.bold, face="bold"),
               axis.text.x=element_text(face="plain"),
-              axis.title=element_blank(),
-              plot.margin=unit(c(5,5,5,0),"mm"),
+              axis.title.x=element_blank(),
+              axis.title.y=element_blank(),
+              plot.margin = margin(1,3,5,0, unit = "mm"), #trbl
+              legend.box.spacing = unit(0.2, "lines"),
+              legend.margin = margin(0,0,0.3,0, "lines"),
               legend.title = element_blank(),
-              legend.key.size = unit(1.5*textsize, "points"))
+              legend.key.size = unit(1.5*textsize, "points"),
+              legend.text = element_text(size = rel(1.0), lineheight = 0.8),
+              legend.position = "none",
+              strip.text = element_text(size = rel(1.0))
+        )
     },
     colors = listy(
+      text = "grey10",
+      text.inverse = "white",
       spot.primary = "#cc0641",
       spot.secondary = "gray30",
       spot.primary.light = lighten(spot.primary),
@@ -126,7 +164,9 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         "#9e9f9e",
         "#686868"
       ),
-      continuous = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) }
+      continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) },
+      continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
+      continuous = continuous.primary
     ),
     shapes = list(
       categorical = c(
@@ -148,11 +188,12 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         SSF = "solid"
       ),
       world = c(WLD = "12")
-    )
+    ),
+    arrow = function(ends = "last") { grid::arrow(length = unit(1.5, "mm"), type = "closed", ends = ends) }
   ))
 }
 
-# '@export
+#' @export
 style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy") {
   modifyList(style_atlas(textsize, family, family.bold), list(
     colors = listy(
@@ -161,7 +202,7 @@ style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Av
       spot.primary.light = cmyk(1.3, 50, 29.3, 6.1, maxColorValue = 100),
       spot.primary.dark = darken(spot.primary),
       spot.secondary.light = cmyk(0, 0, 0, 50, maxColorValue = 100),
-      spot.secondary.dark = lighten(spot.secondary),
+      spot.secondary.dark = darken(spot.secondary),
       regions = c(
         EAS = cmyk(0, 55, 90, 10, maxColorValue = 100), #rgb(223, 127, 46, maxColorValue = 255),
         ECS = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #rgb(206,18,73, maxColorValue = 255),

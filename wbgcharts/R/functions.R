@@ -424,3 +424,64 @@ listy <- function(...) {
   }
   l
 }
+
+count_lines <- function(strings) {
+    sapply(strsplit(strings, "\n"), length)
+}
+
+#' Wrap a vector of strings to a specified number of lines
+#'
+#' Like \code{stringr::str_wrap()} except that instead of specifying a width you
+#' specify a "height" (ie. a number of lines that each string can occupy). The
+#' longest string and "height" will jointly determine the width, which will then
+#' be applied to the other strings - so that strings are not unnecessarily wrapped.
+#'
+#' @export
+str_wrap_lines <- function(strings, lines = 2, indent = 0, exdent = 0) {
+  # Calculate the necessary width for a two line wrap - it has to be at least as
+  # large as 1/lines the longest string
+  width <- max(round(nchar(wbgref$regions$labels)/lines))
+  while (TRUE) {
+    wrapped <- stringr::str_wrap(strings, width, indent, exdent)
+    wrapped.lines <- count_lines(wrapped)
+    if (max(wrapped.lines) <= lines) break
+    width <- width + 1
+  }
+  wrapped
+}
+
+relative_luminance <- function(c) {
+  cg <- ifelse(c <= 10, c/3294, (c/269 + 0.0513)^2.4)
+  L <- 0.2126 * cg["red",] + 0.7152 * cg["green",] + 0.0722 * cg["blue",]
+  L
+}
+
+contrast_ratio <- function(a, b) {
+  # http://ux.stackexchange.com/a/82068
+  rgb_a <- col2rgb(a)
+  rgb_b <- col2rgb(b)
+  L_a <- relative_luminance(rgb_a)
+  L_b <- relative_luminance(rgb_b)
+  L_big <- ifelse(L_a > L_b, L_a, L_b)
+  L_small <- ifelse(L_a > L_b, L_b, L_a)
+  (L_big + 0.05) / (L_small + 0.05)
+}
+
+#' Select contrasting text colors, from a list, for a set of fill colors
+#'
+#' Given a (possibly named) vector of fill (background) colors, this function
+#' returns a (possibly named) vector of highest-contrast text (foreground)
+#' colors, from a list of potential text colors (usually two is sufficient).
+#'
+#' @param biases added to the "true" contrast ratios to bias the selection
+#'
+#' @export
+contrasting_colors <- function(fillcolors, textcolors=c("black", "white"), biases=c(0, 2)) {
+  setNames(
+    sapply(fillcolors, function(bg) {
+      contrast_ratios <- sapply(textcolors, function(fg) {contrast_ratio(bg, fg)})
+      textcolors[which.max(contrast_ratios + biases)]
+    }),
+    names(fillcolors)
+  )
+}

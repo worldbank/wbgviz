@@ -198,6 +198,24 @@ figure_save_web_png <- function(fig, style, filename, width = 1500/96/2, height 
 }
 
 #' @export
+figure_save_final_pdf <- function (fig, style, filename, width = 1500/96/2, height = NULL, colormodel = "cmyk", ...){
+  # Temporary fix
+  filename <- tools::file_path_sans_ext(filename)
+
+  if (is.null(height)) {
+    height <- width/fig$aspect_ratio
+  }
+  pdf(paste0(filename, ".pdf"), width = width, height = height, colormodel = colormodel, ...)
+  p <- fig$plot(style())
+  f <- add_captions(p, if (is.null(fig$theme))
+    p$theme
+    else fig$theme, title = fig$meta$title, subtitle = fig$meta$subtitle,
+    note = fig$meta$note, source = fig$meta$source, show.logo = FALSE)
+  grid::grid.draw(f)
+  dev.off()
+}
+
+#' @export
 figure_demo <- function(N = 10, from = 2011, to = 2015) {figure(
   data = function(self) {
     df <- wbgdata(

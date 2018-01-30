@@ -219,22 +219,29 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
 #'
 #' @export
 #'
-wbg_source <- function(indicatorIDs) {
-  wdi_ind <- get_wbcache()$indicators
+wbg_source <- function(indicatorIDs, source = NULL) {
+  if (is.null(source)) {
+    wdi_ind <- get_wbcache()$indicators
 
-  core_indicators <- setdiff(indicatorIDs, c('SP.POP.TOTL', 'SP.RUR.TOTL', 'SP.URB.TOTL'))
-  core_indicators <- core_indicators[!grepl('SP\\.POP', core_indicators)]
-  if (length(core_indicators) == 0) {
-    core_indicators <- indicatorIDs
+    core_indicators <- setdiff(indicatorIDs, c('SP.POP.TOTL', 'SP.RUR.TOTL', 'SP.URB.TOTL'))
+    core_indicators <- core_indicators[!grepl('SP\\.POP', core_indicators)]
+    if (length(core_indicators) == 0) {
+      core_indicators <- indicatorIDs
+    }
+    orgs <- wdi_ind$sourceOrg[wdi_ind$indicatorID %in% core_indicators]
+    orgs <- unique(orgs)
+    orgs <- unlist(lapply(strsplit(orgs, "\\.( [A-Z]|$)"), first))
+    orgs <- gsub("\\s*\\([^\\)]+\\)","", orgs)
+    sources <- paste0(
+      paste(orgs, collapse="; "), ". ",
+      "WDI (", paste(indicatorIDs, collapse="; "), ")."
+    )
+  } else {
+    sources <- paste0(
+      source, ". ",
+      "WDI (", paste(indicatorIDs, collapse="; "), ")."
+    )
   }
-  orgs <- wdi_ind$sourceOrg[wdi_ind$indicatorID %in% core_indicators]
-  orgs <- unique(orgs)
-  orgs <- unlist(lapply(strsplit(orgs, "\\.( [A-Z]|$)"), first))
-  orgs <- gsub("\\s*\\([^\\)]+\\)","", orgs)
-  sources <- paste0(
-    paste(orgs, collapse="; "), ". ",
-    "WDI (", paste(indicatorIDs, collapse="; "), ")."
-  )
   return(sources)
 }
 

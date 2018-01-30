@@ -18,7 +18,8 @@ Imports: ggplot2,
     scales,
     tidyr,
     digest,
-    rappdirs
+    rappdirs,
+    stringr
 Suggests: png,
     extrafont,
     knitr,

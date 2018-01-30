@@ -4,7 +4,7 @@
 \alias{wbg_source}
 \title{Build a source string for World Bank indicators}
 \usage{
-wbg_source(indicatorIDs)
+wbg_source(indicatorIDs, source = NULL)
 }
 \arguments{
 \item{indicatorIDs}{a vector of indicator IDs (SETS codes)}
