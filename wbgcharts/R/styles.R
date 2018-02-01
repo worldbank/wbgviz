@@ -74,7 +74,7 @@ style_base <- function(textsize=7) {
     },
     theme_scatter = function() {
       theme(
-        axis.title.x = element_text(margin = margin(1,0,0,0,"lines")),
+        axis.title.x.bottom = element_text(margin = margin(1,0,0,0,"lines")),
         panel.grid.major.x = NULL
       )
     },
@@ -118,8 +118,10 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
               axis.text=element_text(size=rel(1.0)),
               axis.text.y=element_text(family = family.bold, face="bold"),
               axis.text.x=element_text(face="plain"),
-              axis.title.x=element_blank(),
-              axis.title.y=element_blank(),
+              axis.title.x.top = element_blank(),
+              axis.title.x.bottom = element_blank(),
+              axis.title.y.left= element_blank(),
+              axis.title.y.right =element_blank(),
               plot.margin = margin(1,3,5,0, unit = "mm"), #trbl
               legend.box.spacing = unit(0.2, "lines"),
               legend.margin = margin(0,0,0.3,0, "lines"),
@@ -166,7 +168,8 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
       ),
       continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) },
       continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
-      continuous = continuous.primary
+      continuous = continuous.primary,
+      reference = "grey70"
     ),
     shapes = list(
       categorical = c(
@@ -187,7 +190,8 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         SAS = "solid",
         SSF = "solid"
       ),
-      world = c(WLD = "12")
+      world = c(WLD = "12"),
+      reference = "longdash"
     ),
     arrow = function(ends = "last") { grid::arrow(length = unit(1.5, "mm"), type = "closed", ends = ends) }
   ))
@@ -222,7 +226,10 @@ style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Av
         "#9e9f9e",
         "#686868"
       ),
-      continuous = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) }
+      continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) },
+      continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
+      continuous = continuous.primary,
+      reference = "grey70"
     )))
 }
 
