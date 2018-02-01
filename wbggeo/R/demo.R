@@ -7,7 +7,7 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
     geom_path(data = maps$boundaries, aes(long, lat, group = group), color = "white", size = 0.2, lineend = maps$boundaries$lineend, linetype = maps$boundaries$linetype) +
     scale_x_continuous(expand = c(0, 0), limits = standard_crop_wintri()$xlim) +
     scale_y_continuous(expand = c(0, 0), limits = standard_crop_wintri()$ylim) +
-    scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", labels = rename_na("No data")) +
+    scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", labels = rename_na("No data"), drop = FALSE) +
     coord_equal() +
     style$theme() +
     style$theme_map(aspect_ratio)
