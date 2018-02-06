@@ -121,8 +121,9 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
               axis.title.x = element_blank(),
               #axis.title.x.top = element_blank(),
               #axis.title.x.bottom = element_blank(),
-              axis.title.y.left= element_blank(),
-              axis.title.y.right =element_blank(),
+              axis.title.y = element_blank(),
+              #axis.title.y.left= element_blank(),
+              #axis.title.y.right =element_blank(),
               plot.margin = margin(1,3,5,0, unit = "mm"), #trbl
               legend.box.spacing = unit(0.2, "lines"),
               legend.margin = margin(0,0,0.3,0, "lines"),
