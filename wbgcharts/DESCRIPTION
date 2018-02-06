@@ -10,6 +10,7 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1.9000
+Roxygen: list(markdown = TRUE)
 Imports: ggplot2,
     grid,
     gtable,

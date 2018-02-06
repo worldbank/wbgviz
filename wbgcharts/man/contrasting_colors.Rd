@@ -4,7 +4,11 @@
 \alias{contrasting_colors}
 \title{Select contrasting text colors, from a list, for a set of fill colors}
 \usage{
-contrasting_colors(fillcolors, textcolors = c("black", "white"))
+contrasting_colors(fillcolors, textcolors = c("black", "white"),
+  biases = c(0, 2))
+}
+\arguments{
+\item{biases}{added to the "true" contrast ratios to bias the selection}
 }
 \description{
 Given a (possibly named) vector of fill (background) colors, this function

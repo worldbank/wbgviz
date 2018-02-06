@@ -131,10 +131,30 @@ wbgdata_build_cache_filename <- function(country, indicator, startdate, enddate)
   paste0(hash,".csv")
 }
 
+#' Download data from the World Bank API (wrapper for wbstats::wb)
+#'
+#' \code{wbgdata} is a wrapper for the \code{wbstats::wb} function. It also
+#' downloads data using the World Bank API, but offers enhancements including
+#' better cached data management, more input parameter formats and more output
+#' formats, based boilerplate code I found myself constantly retypting.
+#'
+#' @param indicator a vector of indicator (SETS) codes. If named and
+#'        \code{rename.indicators} is true, the indicator codes will be replaced
+#'        by their respective names.
+#' @param years an alternative to \code{startdate} and \code{enddate} (which it
+#'        overrides), a vector of years for which to download data.
+#' @param col.indicator if true, return the indicator (description) column
+#' @param cache the wbstats cache object to use (default usually ok)
+#' @param indicator.wide return the indicators in wide (not long) format
+#' @param offline (experimental)
+#' @param rename.indicators see \code{indicator} paramater
+#' @inheritParams wbstats::wb
+#'
 #' @export
 wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
                    col.indicator = FALSE, cache = get_wbcache(),
-                   indicator.wide = TRUE, removeNA = FALSE, offline="none") {
+                   indicator.wide = TRUE, removeNA = FALSE, offline="none",
+                   rename.indicators = TRUE) {
   if (!missing(years)) {
     if (!missing(startdate) | !missing(enddate)) {
       stop("Provide either years or (startdate and enddate) but not both.")
@@ -195,6 +215,10 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
 
   if (!missing(years)) {
     df <- df %>% filter(date %in% years)
+  }
+
+  if (!is.null(names(indicator)) && rename.indicators) {
+    df <- df %>% mutate(indicatorID = names(indicator)[match(indicatorID, indicator)])
   }
 
   if (indicator.wide) {
