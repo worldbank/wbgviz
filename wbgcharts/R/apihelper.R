@@ -154,7 +154,7 @@ wbgdata_build_cache_filename <- function(country, indicator, startdate, enddate)
 wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
                    col.indicator = FALSE, cache = get_wbcache(),
                    indicator.wide = TRUE, removeNA = FALSE, offline="none",
-                   rename.indicators = TRUE) {
+                   rename.indicators = FALSE) {
   if (!missing(years)) {
     if (!missing(startdate) | !missing(enddate)) {
       stop("Provide either years or (startdate and enddate) but not both.")
