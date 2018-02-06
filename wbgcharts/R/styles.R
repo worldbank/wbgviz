@@ -129,7 +129,8 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
               legend.key.size = unit(1.5*textsize, "points"),
               legend.text = element_text(size = rel(1.0), lineheight = 0.8),
               legend.position = "none",
-              strip.text = element_text(size = rel(1.0))
+              strip.text = element_text(size = rel(1.0), hjust = 0),
+              strip.placement = "outside"
         )
     },
     colors = listy(
@@ -159,6 +160,14 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         LMC = spot.secondary.light,
         LIC = spot.secondary
       ),
+      gender = c(
+        female = spot.primary,
+        male = spot.secondary
+      ),
+      urban_rural = c(
+        urban = spot.primary,
+        rural = spot.primary.light
+      ),
       categorical = c(
         spot.primary,
         spot.primary.light,
@@ -169,7 +178,8 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
       continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) },
       continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
       continuous = continuous.primary,
-      reference = "grey70"
+      reference = "grey70",
+      baseline = "black"
     ),
     shapes = list(
       categorical = c(
@@ -191,7 +201,8 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         SSF = "solid"
       ),
       world = c(WLD = "12"),
-      reference = "longdash"
+      reference = "longdash",
+      baseline = "solid"
     ),
     arrow = function(ends = "last") { grid::arrow(length = unit(1.5, "mm"), type = "closed", ends = ends) }
   ))
@@ -219,6 +230,20 @@ style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Av
       world = c(WLD = "black"),
       regions.light = rgba2rgb(regions, alpha = 0.7, background = "white"),
       regions.dark = rgba2rgb(regions, alpha = 0.7, background = "black"),
+      incomes = c(
+        HIC = spot.primary,
+        UMC = spot.primary.light,
+        LMC = spot.secondary.light,
+        LIC = spot.secondary
+      ),
+      gender = c(
+        female = spot.primary,
+        male = spot.secondary
+      ),
+      urban_rural = c(
+        urban = spot.primary,
+        rural = spot.primary.light
+      ),
       categorical = c(
         spot.primary,
         spot.primary.light,
@@ -229,7 +254,8 @@ style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Av
       continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) },
       continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
       continuous = continuous.primary,
-      reference = "grey70"
+      reference = "grey70",
+      baseline = "black"
     )))
 }
 
