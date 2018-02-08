@@ -240,7 +240,7 @@ interleave_panels_horizontal <- function(
   ...,
   width.ratio = 1, major.space = unit(1, "line"), minor.space = unit(0.5, "line"))
 {
-  pgs = lapply(lapply(list(...), ggplotGrob), grid.force)
+  pgs <- lapply(lapply(list(...), ggplotGrob), grid.force)
   panel_names <- pgs[[1]]$layout$name[(grepl("panel", pgs[[1]]$layout$name))]
 
   plot_count <- length(pgs)
@@ -265,12 +265,17 @@ interleave_panels_horizontal <- function(
 
   chart <- gtable(
     unit.c(ylabels$width, unit(rep_len(width.ratio,panel_count*plot_count), "null")),
-    unit.c(grobHeight(panel_titles[[1]])*1.2, grobHeight(plot_titles[[1]])*1.2, unit(1, 'null'))
+    unit.c(
+      if (length(panel_titles) > 0) grobHeight(panel_titles[[1]])*1.2 else unit(0, 'null'),
+      grobHeight(plot_titles[[1]])*1.2,
+      unit(1, 'null')
+    )
   )
 
   chart <- gtable_add_grob(chart, ylabels, 3, 1)
   for (panel_id in 1:panel_count) {
-    chart <- gtable_add_grob(chart, panel_titles[[panel_id]], 1, 1+(panel_id-1)*plot_count+1)
+    if (length(panel_titles) > 0)
+      chart <- gtable_add_grob(chart, panel_titles[[panel_id]], 1, 1+(panel_id-1)*plot_count+1)
     for (plot_id in 1:plot_count) {
       column <- 1+(panel_id-1)*plot_count+plot_id
       chart <- gtable_add_grob(chart, plot_titles[[plot_id]], 2, column)
