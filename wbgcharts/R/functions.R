@@ -490,3 +490,16 @@ contrasting_colors <- function(fillcolors, textcolors=c("black", "white"), biase
     names(fillcolors)
   )
 }
+
+#' Invert the values and names of a vector
+#'
+#' This is useful because ggplot uses named vectors a lot as associative
+#' arrays.
+#'
+#' @export
+inv <- function(x) {
+  if (is.null(names(x)))
+    stop("Error - can't invert a vector without names.")
+
+  setNames(names(x), x)
+}
