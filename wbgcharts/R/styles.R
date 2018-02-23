@@ -109,34 +109,37 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
   modifyList(style_base(textsize), list(
     theme = function() {
       theme_minimal() +
-        theme(text = element_text(family = family, size=textsize, color="grey10"),
+        theme(text = element_text(family = family, size=textsize, color="grey20"),
+              line = element_line(size = 0.176389), # 0.5 pt in mm
               panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank(),
               panel.grid.minor.y = element_blank(),
-              plot.caption=element_text(hjust=0, size=rel(0.9), margin=margin(1.5,0,0,0, unit="line"), lineheight = 1, color = "grey70"),
-              plot.title=element_text(hjust=0, size=rel(1.15), family=family.bold, face="bold", lineheight = 1),
-              plot.subtitle = element_text(hjust=0, size=rel(1.0), lineheight = 1),
-              axis.text=element_text(size=rel(1.0)),
-              axis.text.y=element_text(family = family.bold, face="bold"),
-              axis.text.x=element_text(face="plain"),
+              plot.caption=element_text(hjust=0, size=rel(6/7), lineheight = 1, margin=margin(1.5,0,0,0, unit="line"), color = "grey60"),
+              plot.title=element_text(hjust=0, size=rel(10/7), lineheight = 1, family=family.bold, face="bold"),
+              plot.subtitle = element_text(hjust=0, size=rel(8/7), lineheight = 1),
+              strip.text = element_text(hjust = 0, size=rel(8/7), lineheight = 1), # strip text is kind of like subtitle text
+              axis.text=element_text(size = rel(1.0)),
+              axis.text.y=element_text(),
+              axis.text.x=element_text(),
+              axis.title = element_text(size = rel(1.0), color = "black"),
               axis.title.x = element_blank(),
               #axis.title.x.top = element_blank(),
               #axis.title.x.bottom = element_blank(),
               axis.title.y = element_blank(),
               #axis.title.y.left= element_blank(),
               #axis.title.y.right =element_blank(),
-              plot.margin = margin(1,3,5,0, unit = "mm"), #trbl
               legend.box.spacing = unit(0.2, "lines"),
               legend.margin = margin(0,0,0.3,0, "lines"),
               legend.title = element_blank(),
               legend.key.size = unit(1.5*textsize, "points"),
-              legend.text = element_text(size = rel(1.0), lineheight = 0.8),
+              legend.text = element_text(size = rel(1.0), lineheight = 0.8, margin = margin(0,2,0,0, "char")),
               legend.position = "none",
-              strip.text = element_text(size = rel(1.0), hjust = 0),
-              strip.placement = "outside"
+              strip.placement = "outside",
+              plot.margin = margin(1,1,5,0, unit = "mm") #trbl
         )
     },
     colors = listy(
-      text = "grey10",
+      neutral = "grey80",
+      text = "grey20",
       text.inverse = "white",
       spot.primary = "#cc0641",
       spot.secondary = "gray30",
@@ -214,6 +217,9 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
 style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy") {
   modifyList(style_atlas(textsize, family, family.bold), list(
     colors = listy(
+      neutral = "grey80",
+      text = "grey20",
+      text.inverse = "white",
       spot.primary = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #"#https://data.worldbank.org/indicator/SH.STA.STNT.MA.ZS?locations=BD",
       spot.primary.light = cmyk(1.3, 50, 29.3, 6.1, maxColorValue = 100),
       spot.primary.dark = cmyk(0, 97, 68, 75, maxColorValue = 100),

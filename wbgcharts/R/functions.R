@@ -215,17 +215,19 @@ add_captions <- function(plot, theme, title = NULL, subtitle = NULL, note = NULL
   # If we add the padding in the main gtable it can break the wrapping
   # as it will not be accounted for (this is complex). So we add it via
   # the viewpoint.
-  vp <- viewport(width = unit(1 - 0.025*2, "npc"), height = unit(1 - 0.025*2, "npc"))
+  tb.margin <- 1
+  lr.margin <- 0
+  vp <- viewport(width = unit(1, "npc") - unit(lr.margin*2, "mm"), height = unit(1, "npc") - unit(tb.margin*2, "mm"))
 
   # FIXME: incorporate extra space into elements not here
   figure <- gtable(
     unit.c(unit(1, "null"), grobWidth(grob_logo$children[[1]])),
     unit.c(
-      grobHeight(grob_title)+unit(0.1*!is.null(title), "in"),
+      grobHeight(grob_title)+unit(0.13*!is.null(title), "in"),
       grobHeight(grob_subtitle)+unit(0.1*!is.null(subtitle), "in"),
       unit(1, "null"),
-      grobHeight(grid.force(grob_note))+unit(0.1*!is.null(note), "in"),
-      grobHeight(grob_source)+unit(0.1*!is.null(source), "in"),
+      grobHeight(grid.force(grob_note))+unit(0.07*!is.null(note), "in"),
+      grobHeight(grob_source)+unit(0.07*!is.null(source), "in"),
       max(grobHeight(grob_source_url), grobHeight(grob_logo$children[[1]]))
     ),
     vp = vp
