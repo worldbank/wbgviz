@@ -5,7 +5,8 @@
 \title{Add captions (title, notes, etc) to a plot or grid graphics object (grob)}
 \usage{
 add_captions(plot, theme, title = NULL, subtitle = NULL, note = NULL,
-  source = NULL, source_url = NULL, show.logo = TRUE)
+  source = NULL, source_url = NULL, show.logo = TRUE,
+  padding = margin(0, 0, 0, 0, "pt"))
 }
 \arguments{
 \item{plot}{the \code{ggplot} plot object or a {grid} grob}

@@ -177,7 +177,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         "#9e9f9e",
         "#686868"
       ),
-      continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) },
+      continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary))((1:n)/n) },
       continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
       continuous = continuous.primary,
       reference = "grey70",
@@ -215,9 +215,9 @@ style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Av
   modifyList(style_atlas(textsize, family, family.bold), list(
     colors = listy(
       spot.primary = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #"#https://data.worldbank.org/indicator/SH.STA.STNT.MA.ZS?locations=BD",
-      spot.secondary = cmyk(0, 0, 0, 80, maxColorValue = 100),
       spot.primary.light = cmyk(1.3, 50, 29.3, 6.1, maxColorValue = 100),
-      spot.primary.dark = darken(spot.primary),
+      spot.primary.dark = cmyk(0, 97, 68, 75, maxColorValue = 100),
+      spot.secondary = cmyk(0, 0, 0, 80, maxColorValue = 100),
       spot.secondary.light = cmyk(0, 0, 0, 50, maxColorValue = 100),
       spot.secondary.dark = darken(spot.secondary),
       regions = c(
@@ -253,7 +253,7 @@ style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Av
         "#9e9f9e",
         "#686868"
       ),
-      continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))((1:n)/n) },
+      continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary))((1:n)/n) },
       continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
       continuous = continuous.primary,
       reference = "grey70",

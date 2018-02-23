@@ -1,21 +1,3 @@
-#' @export
-#' @method print wbgfigure
-print.wbgfigure <- function(x, ...) {
-  grid.newpage()
-  p <- x$plot(...)
-  f <- add_captions(
-    p,
-    if(is.null(p$theme)) x$theme else p$theme,
-    title = x$meta$title,
-    subtitle = x$meta$subtitle,
-    source = x$meta$source,
-    note = x$meta$note,
-    source_url = x$meta$source_url,
-    show.logo = TRUE
-  )
-  grid.draw(f)
-}
-
 wbgfigure_parent <- ggplot2::ggproto("wbgfigure_parent",
   data = function(self, refresh = FALSE) {
     if (is.null(self$.cached_data) | refresh) {
@@ -93,6 +75,27 @@ figure <- function(data, plot, theme = NULL, aspect_ratio = 1,...) {
           meta = list(...))
 }
 
+##### PRINT FUNCTIONS
+
+#' @export
+#' @method print wbgfigure
+print.wbgfigure <- function(x, padding = margin(0,0,0,0,"pt"), ...) {
+  grid.newpage()
+  p <- x$plot(...)
+  f <- add_captions(
+    p,
+    if(is.null(p$theme)) x$theme else p$theme,
+    title = x$meta$title,
+    subtitle = x$meta$subtitle,
+    source = x$meta$source,
+    note = x$meta$note,
+    source_url = x$meta$source_url,
+    show.logo = FALSE,
+    padding = padding
+  )
+  grid.draw(f)
+}
+
 #' @export
 figure_rmarkdown_pre <- function(fig) {
   paste0(
@@ -140,7 +143,7 @@ figure_rmarkdown_ggiraph <- function(ggi) {
 }
 
 #' @export
-figure_save_draft_png <- function(fig, style, filename, width = 1500/96/2, height = NULL, res = 96*2, metadata = TRUE, ...) {
+figure_save_draft_png <- function(fig, style, filename, width = 1500/96/2, height = NULL, res = 96*2, metadata = TRUE, padding = margin(0,0,0,0,"pt"), ...) {
   if (is.null(height)) {
     height <- width / fig$aspect_ratio
   }
@@ -155,7 +158,8 @@ figure_save_draft_png <- function(fig, style, filename, width = 1500/96/2, heigh
     subtitle = fig$meta$subtitle,
     note = fig$meta$note,
     source = fig$meta$source,
-    show.logo = FALSE
+    show.logo = FALSE,
+    padding = padding
   )
   grid.draw(f)
   dev.off()
@@ -198,7 +202,7 @@ figure_save_web_png <- function(fig, style, filename, width = 1500/96/2, height 
 }
 
 #' @export
-figure_save_final_pdf <- function (fig, style, filename, width = 1500/96/2, height = NULL, colormodel = "cmyk", ...){
+figure_save_final_pdf <- function (fig, style, filename, width = 1500/96/2, height = NULL, colormodel = "cmyk", padding = margin(0,0,0,0,"pt"), ...){
   # Temporary fix
   filename <- tools::file_path_sans_ext(filename)
 
@@ -207,67 +211,15 @@ figure_save_final_pdf <- function (fig, style, filename, width = 1500/96/2, heig
   }
   pdf(paste0(filename, ".pdf"), width = width, height = height, colormodel = colormodel, ...)
   p <- fig$plot(style())
-  f <- add_captions(p, if (is.null(fig$theme))
-    p$theme
-    else fig$theme, title = fig$meta$title, subtitle = fig$meta$subtitle,
-    note = fig$meta$note, source = fig$meta$source, show.logo = FALSE)
+  f <- add_captions(
+    p,
+    if (is.null(fig$theme)) p$theme else fig$theme,
+    title = fig$meta$title,
+    subtitle = fig$meta$subtitle,
+    note = fig$meta$note,
+    source = fig$meta$source,
+    show.logo = FALSE,
+    padding = padding)
   grid::grid.draw(f)
   dev.off()
 }
-
-#' @export
-figure_demo <- function(N = 10, from = 2011, to = 2015) {figure(
-  data = function(self) {
-    df <- wbgdata(
-      country = wbgref$countries$iso3c,
-      indicator = c("SE.SEC.NENR.MA", "SE.SEC.NENR.FE"),
-      startdate = from, enddate = to
-    )
-
-    # Get the most recent year for each country
-    df <- df %>%
-      filter(complete.cases(.)) %>%
-      group_by(iso3c) %>%
-      filter(date == max(date)) %>%
-      ungroup()
-
-    # Find the top N countries by gap, but order by FE
-    bottom <- df %>%
-      arrange(SE.SEC.NENR.MA - SE.SEC.NENR.FE) %>%
-      tail(N) %>%
-      arrange(-SE.SEC.NENR.FE) %>%
-      pull(iso3c)
-
-    # Reorder & reshape for ggplotting
-    df.long <- df %>%
-      filter(iso3c %in% bottom) %>%
-      mutate(iso3c = factor(iso3c, levels = bottom)) %>%
-      tidyr::gather(indicatorID, value, SE.SEC.NENR.FE, SE.SEC.NENR.MA)
-
-    df.long
-  },
-  plot = function(data, style = style_atlas()) {
-    labeller <- function(c) {
-      paste0(
-        wbgref$countries$labels[c],
-        " (", data$date[match(c, data$iso3c)], ")"
-      )
-    }
-    ggplot(data, aes(x = iso3c, y = value, fill=indicatorID)) +
-      geom_col(position = "bullet") +
-      scale_fill_manual(values = style$colors$categorical, labels = c("Female", "Male")) +
-      scale_x_discrete(labels = labeller) +
-      scale_y_continuous(labels = round, expand = c(0, 0), limits = c(0, 100)) +
-      coord_flip() +
-      style$theme() +
-      style$theme_barchart() +
-      theme(legend.position = c(1,1), legend.justification = c(1,1), legend.direction = "horizontal")
-  },
-  title = "The countries with the largest enrolment gender gaps are mostly low income, with one surprising exception.",
-  subtitle = paste0("Net enrolment rate, secondary (%), most recent year in ",from,"–",to),
-  note = paste0("Note:", N, " countries with largest gap between male and female enrolment, ordered by female enrolment (low to high)"),
-  source = paste("Source:",wbg_source("SE.SEC.NENR")),
-  source_url = "http://datatopics.worldbank.org/sdgatlas/SDG-04-quality-education.html",
-  aspect_ratio = 20/N
-)}
-

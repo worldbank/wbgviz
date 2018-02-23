@@ -1,16 +1,22 @@
 #' @export
-wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1) {
+wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1, fill.values = NULL) {
   p <- ggplot() +
     geom_map(data = data, aes_string(map_id = iso3c, fill = variable), map = maps$countries) +
     geom_polygon(data = maps$disputed, aes(long, lat, group = group, map_id = id), fill = "grey80") +
     geom_polygon(data = maps$lakes, aes(long, lat, group = group), fill = "white") +
     geom_path(data = maps$boundaries, aes(long, lat, group = group), color = "white", size = 0.2, lineend = maps$boundaries$lineend, linetype = maps$boundaries$linetype) +
     scale_x_continuous(expand = c(0, 0), limits = standard_crop_wintri()$xlim) +
-    scale_y_continuous(expand = c(0, 0), limits = standard_crop_wintri()$ylim) +
-    scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", labels = rename_na("No data"), drop = FALSE) +
+    scale_y_continuous(expand = c(0, 0), limits = standard_crop_wintri()$ylim) + {
+      if (is.null(fill.values)) {
+        scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", labels = rename_na("No data"), drop = FALSE)
+      } else {
+        scale_fill_manual(values = fill.values, na.value = "grey80", labels = rename_na("No data"), drop = FALSE)
+      }
+    } +
     coord_equal() +
     style$theme() +
     style$theme_map(aspect_ratio)
+
 
   pg <- wbg_color_disputed(p)
   pg$theme <- style$theme()

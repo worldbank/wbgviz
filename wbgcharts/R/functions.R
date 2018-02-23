@@ -36,6 +36,14 @@ make_subtitle <- function(theme, subtitle = NULL) {
   )
 }
 
+pad_plot <- function(plotGrob, padding) {
+  gtable(
+    widths = unit.c(padding[4], unit(1, "null"), padding[2]),
+    heights = unit.c(padding[1], unit(1, "null"), padding[3])
+  ) %>%
+    gtable_add_grob(plotGrob, 2, 2)
+}
+
 make_note <- function(theme, note = NULL) {
   if (is.null(note))
     return(zeroGrob())
@@ -183,7 +191,7 @@ make_logo <- function(theme, show.logo = TRUE) {
 #' grid.newpage()
 #' grid.draw(g)
 #' @export
-add_captions <- function(plot, theme, title = NULL, subtitle = NULL, note = NULL, source = NULL, source_url = NULL, show.logo=TRUE) {
+add_captions <- function(plot, theme, title = NULL, subtitle = NULL, note = NULL, source = NULL, source_url = NULL, show.logo=TRUE, padding = margin(0,0,0,0,"pt")) {
   # TODO maybe wrap everything in a gTree and apply the gpar from the top level ggplot2
   # in order to catch the theme(text = ...) inherited stuff
   grob_title <- make_title(theme, title)
@@ -200,6 +208,9 @@ add_captions <- function(plot, theme, title = NULL, subtitle = NULL, note = NULL
   } else {
     stop("Don't know how to deal with object of class", class(plot))
   }
+
+  # This function adds optional padding
+  grob_plot <- pad_plot(grob_plot, padding)
 
   # If we add the padding in the main gtable it can break the wrapping
   # as it will not be accounted for (this is complex). So we add it via
@@ -452,7 +463,7 @@ str_wrap_lines <- function(strings, lines = 2, indent = 0, exdent = 0) {
     if (max(wrapped.lines) <= lines) break
     width <- width + 1
   }
-  wrapped
+  setNames(wrapped, names(strings))
 }
 
 relative_luminance <- function(c) {

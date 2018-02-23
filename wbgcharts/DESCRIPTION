@@ -25,5 +25,6 @@ Suggests: png,
     extrafont,
     knitr,
     rmarkdown
-Depends: ggplot2
+Depends: ggplot2,
+    extrafont
 VignetteBuilder: knitr
