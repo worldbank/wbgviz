@@ -438,7 +438,7 @@ listy <- function(...) {
     if (is.null(names(dots)[i]))
       l[[i]] <- eval(dots[[i]], envir = l)
     else
-      l[[names(dots)[i]]] <- eval(dots[[i]], envir = l)
+      l[[names(dots)[i]]] <- eval(dots[[i]], envir = l, enclos = parent.frame())
   }
   l
 }

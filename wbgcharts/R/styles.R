@@ -1,41 +1,11 @@
 #' @export
 style_base <- function(textsize=7) {
   list(
-    labels = list(
-      regions = c(
-        EAS = "East Asia & Pacific",
-        ECS = "Europe & Central Asia",
-        LCN = "Latin America & the Caribbean",
-        MEA = "Middle East & North Africa",
-        NAC = "North America",
-        SAS = "South Asia",
-        SSF = "Sub-Saharan Africa"
-      ),
-      regions_wrapped = c(
-        EAS = "East Asia\n& Pacific",
-        ECS = "Europe\n& Central Asia",
-        LCN = "Latin America\n& the Caribbean",
-        MEA = "Middle East\n& North Africa",
-        NAC = "North America",
-        SAS = "South Asia",
-        SSF = "Sub-Saharan\nAfrica"
-      ),
-      regions_vwrapped = c(
-        EAS = "East\nAsia\n&\nPacific",
-        ECS = "Europe\n&\nCentral\nAsia",
-        LCN = "Latin\nAmerica\n&\nthe\nCaribbean",
-        MEA = "Middle\nEast\n&\nNorth\nAfrica",
-        NAC = "North\nAmerica",
-        SAS = "South\nAsia",
-        SSF = "Sub-\nSaharan\nAfrica"
-      )
-    ),
     gg_text_size = grid::convertX(grid::unit(textsize, "points"), "mm", valueOnly = TRUE),
     gg_max_point_size = grid::convertX(grid::unit(0.1, "npc"), "mm", valueOnly = TRUE),
     theme_map = function(aspect_ratio = 1) {
       t <- theme(
         panel.grid = element_blank(),
-        plot.margin=unit(c(0,0,0,0),"mm"),
         axis.text = element_blank()
       )
 
@@ -105,87 +75,60 @@ style_base <- function(textsize=7) {
 }
 
 #' @export
-style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy") {
-  modifyList(style_base(textsize), list(
-    theme = function() {
-      theme_minimal() +
-        theme(text = element_text(family = family, size=textsize, color="grey20"),
-              line = element_line(size = 0.176389), # 0.5 pt in mm
-              panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank(),
-              panel.grid.minor.y = element_blank(),
-              plot.caption=element_text(hjust=0, size=rel(6/7), lineheight = 1, margin=margin(1.5,0,0,0, unit="line"), color = "grey60"),
-              plot.title=element_text(hjust=0, size=rel(10/7), lineheight = 1, family=family.bold, face="bold"),
-              plot.subtitle = element_text(hjust=0, size=rel(8/7), lineheight = 1),
-              strip.text = element_text(hjust = 0, size=rel(8/7), lineheight = 1), # strip text is kind of like subtitle text
-              axis.text=element_text(size = rel(1.0)),
-              axis.text.y=element_text(),
-              axis.text.x=element_text(),
-              axis.title = element_text(size = rel(1.0), color = "black"),
-              axis.title.x = element_blank(),
-              #axis.title.x.top = element_blank(),
-              #axis.title.x.bottom = element_blank(),
-              axis.title.y = element_blank(),
-              #axis.title.y.left= element_blank(),
-              #axis.title.y.right =element_blank(),
-              legend.box.spacing = unit(0.2, "lines"),
-              legend.margin = margin(0,0,0.3,0, "lines"),
-              legend.title = element_blank(),
-              legend.key.size = unit(1.5*textsize, "points"),
-              legend.text = element_text(size = rel(1.0), lineheight = 0.8, margin = margin(0,2,0,0, "char")),
-              legend.position = "none",
-              strip.placement = "outside",
-              plot.margin = margin(1,1,5,0, unit = "mm") #trbl
-        )
-    },
+style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy", is.cmyk = FALSE) {
+  modifyList(style_base(textsize), listy(
+    ## COLORS ##################################################################
     colors = listy(
-      neutral = "grey80",
-      text = "grey20",
-      text.inverse = "white",
-      spot.primary = "#cc0641",
-      spot.secondary = "gray30",
-      spot.primary.light = lighten(spot.primary),
-      spot.primary.dark = darken(spot.primary),
-      spot.secondary.light = lighten(spot.secondary),
-      spot.secondary.dark = darken(spot.secondary),
+      neutral                  = "grey80",
+      text                     = "grey20",
+      text.inverse             = "white",
+      spot.primary             = if (!is.cmyk) "#cc0641"               else cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100),
+      spot.primary.light       = if (!is.cmyk) lighten(spot.primary)   else cmyk(1.3, 50, 29.3, 6.1, maxColorValue = 100),
+      spot.primary.dark        = if (!is.cmyk) darken(spot.primary)    else cmyk(0, 97, 68, 75, maxColorValue = 100),
+      spot.secondary           = if (!is.cmyk) "gray30"                else cmyk(0, 0, 0, 80, maxColorValue = 100),
+      spot.secondary.light     = if (!is.cmyk) lighten(spot.secondary) else cmyk(0, 0, 0, 50, maxColorValue = 100),
+      spot.secondary.dark      = darken(spot.secondary),
       regions = c(
-        EAS = rgb(223, 127, 46, maxColorValue = 255),
-        ECS = rgb(206,18,73, maxColorValue = 255),
-        LCN = rgb(58,148,60, maxColorValue = 255),
-        MEA = rgb(127, 62, 131, maxColorValue = 255),
-        NAC = rgb(77, 77, 76, maxColorValue = 255),
-        SAS = rgb(32, 120, 182, maxColorValue = 255),
-        SSF = rgb(255, 203, 6, maxColorValue = 255)
+        EAS                    = if (!is.cmyk) "#DF7F2E"               else cmyk(0, 55, 90, 10, maxColorValue = 100),
+        ECS                    = if (!is.cmyk) "#CE1249"               else cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100),
+        LCN                    = if (!is.cmyk) "#3A943C"               else cmyk(72, 5, 100, 20, maxColorValue = 100),
+        MEA                    = if (!is.cmyk) "#7F3E83"               else cmyk(45, 83, 0, 20, maxColorValue = 100),
+        NAC                    = if (!is.cmyk) "#4D4D4C"               else cmyk(0, 0, 0, 80, maxColorValue = 100),
+        SAS                    = if (!is.cmyk) "#2078B6"               else cmyk(80, 40, 0, 10, maxColorValue = 100),
+        SSF                    = if (!is.cmyk) "#FFCB06"               else cmyk(0, 20, 100, 0, maxColorValue = 100)
       ),
-      world = c(WLD = "black"),
-      regions.light = rgba2rgb(regions, alpha = 0.7, background = "white"),
-      regions.dark = rgba2rgb(regions, alpha = 0.7, background = "black"),
+      world                    = c(WLD = "black"),
+      regions.light            = rgba2rgb(regions, alpha = 0.7, background = "white"),
+      regions.dark             = rgba2rgb(regions, alpha = 0.7, background = "black"),
       incomes = c(
-        HIC = spot.primary,
-        UMC = spot.primary.light,
-        LMC = spot.secondary.light,
-        LIC = spot.secondary
+        HIC                    = spot.primary,
+        UMC                    = spot.primary.light,
+        LMC                    = spot.secondary.light,
+        LIC                    = spot.secondary
       ),
       gender = c(
-        female = spot.primary,
-        male = spot.secondary
+        female                 = spot.primary,
+        male                   = spot.secondary
       ),
       urban_rural = c(
-        urban = spot.primary,
-        rural = spot.primary.light
+        urban                  = spot.primary,
+        rural                  = spot.primary.light
       ),
       categorical = c(
-        spot.primary,
-        spot.primary.light,
-        "#4d4d4c",
-        "#9e9f9e",
-        "#686868"
+                                 spot.primary,
+                                 spot.primary.light,
+                                 spot.secondary,
+                                 spot.secondary.light,
+                                 spot.secondary.dark
       ),
-      continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary))((1:n)/n) },
-      continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
-      continuous = continuous.primary,
-      reference = "grey70",
-      baseline = "black"
+      reference                = "grey70",
+      baseline                 = "black",
+      continuous.primary       = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary))((1:n)/n) },
+      continuous.secondary     = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
+      continuous               = continuous.primary
     ),
+
+    ## SHAPES & LINES ##########################################################
     shapes = list(
       categorical = c(
         19,
@@ -209,68 +152,50 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
       reference = "longdash",
       baseline = "solid"
     ),
-    arrow = function(ends = "last") { grid::arrow(length = unit(1.5, "mm"), type = "closed", ends = ends) }
+    arrow = function(ends = "last") { grid::arrow(length = unit(1.5, "mm"), type = "closed", ends = ends) },
+
+    ## SHAPES & LINES ##########################################################
+    theme = function() {
+      theme_minimal() +
+        theme(text                 = element_text(family = family, size=textsize, color=colors$text),
+              line                 = element_line(size = 0.35),
+              panel.grid.major.x   = element_blank(), panel.grid.minor.x = element_blank(),
+              panel.grid.minor.y   = element_blank(),
+              plot.caption         = element_text(hjust=0, size=rel(6/7), lineheight = 1, margin=margin(1.5,0,0,0, unit="line"), color = "grey60"),
+              plot.title           = element_text(hjust=0, size=rel(10/7), lineheight = 1, family=family.bold, face="bold"),
+              plot.subtitle        = element_text(hjust=0, size=rel(8/7), lineheight = 1),
+              strip.text           = element_text(hjust = 0, size=rel(8/7), lineheight = 1), # strip text is kind of like subtitle text
+              axis.text            = element_text(size = rel(1.0)),
+              axis.text.y          = element_text(),
+              axis.text.x          = element_text(),
+              axis.title           = element_text(size = rel(1.0)),
+              axis.title.x         = element_blank(),
+              #axis.title.x.top    = element_blank(),
+              #axis.title.x.bottom = element_blank(),
+              axis.title.y         = element_blank(),
+              #axis.title.y.left   = element_blank(),
+              #axis.title.y.right  = element_blank(),
+              legend.box.spacing   = unit(0.2, "lines"),
+              legend.margin        = margin(0,0,0.3,0, "lines"),
+              legend.title         = element_blank(),
+              legend.key.size      = unit(1.5*textsize, "points"),
+              legend.text          = element_text(size = rel(1.0), lineheight = 0.8),
+              legend.background    = element_rect(fill = "white", color = NA),
+              legend.position      = "none",
+              strip.placement      = "outside",
+              plot.margin          = margin(1,1,5,0, unit = "mm") #trbl
+        )
+    }
   ))
 }
 
 #' @export
-style_atlas_cmyk <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy") {
-  modifyList(style_atlas(textsize, family, family.bold), list(
-    colors = listy(
-      neutral = "grey80",
-      text = "grey20",
-      text.inverse = "white",
-      spot.primary = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #"#https://data.worldbank.org/indicator/SH.STA.STNT.MA.ZS?locations=BD",
-      spot.primary.light = cmyk(1.3, 50, 29.3, 6.1, maxColorValue = 100),
-      spot.primary.dark = cmyk(0, 97, 68, 75, maxColorValue = 100),
-      spot.secondary = cmyk(0, 0, 0, 80, maxColorValue = 100),
-      spot.secondary.light = cmyk(0, 0, 0, 50, maxColorValue = 100),
-      spot.secondary.dark = darken(spot.secondary),
-      regions = c(
-        EAS = cmyk(0, 55, 90, 10, maxColorValue = 100), #rgb(223, 127, 46, maxColorValue = 255),
-        ECS = cmyk(2.7, 100, 58.6, 12.2, maxColorValue = 100), #rgb(206,18,73, maxColorValue = 255),
-        LCN = cmyk(72, 5, 100, 20, maxColorValue = 100), #rgb(58,148,60, maxColorValue = 255),
-        MEA = cmyk(45, 83, 0, 20, maxColorValue = 100), #rgb(127, 62, 131, maxColorValue = 255),
-        NAC = cmyk(0, 0, 0, 80, maxColorValue = 100), #rgb(77, 77, 76, maxColorValue = 255),
-        SAS = cmyk(80, 40, 0, 10, maxColorValue = 100), #rgb(32, 120, 182, maxColorValue = 255),
-        SSF = cmyk(0, 20, 100, 0, maxColorValue = 100) #rgb(255, 203, 6, maxColorValue = 255)
-      ),
-      world = c(WLD = "black"),
-      regions.light = rgba2rgb(regions, alpha = 0.7, background = "white"),
-      regions.dark = rgba2rgb(regions, alpha = 0.7, background = "black"),
-      incomes = c(
-        HIC = spot.primary,
-        UMC = spot.primary.light,
-        LMC = spot.secondary.light,
-        LIC = spot.secondary
-      ),
-      gender = c(
-        female = spot.primary,
-        male = spot.secondary
-      ),
-      urban_rural = c(
-        urban = spot.primary,
-        rural = spot.primary.light
-      ),
-      categorical = c(
-        spot.primary,
-        spot.primary.light,
-        "#4d4d4c",
-        "#9e9f9e",
-        "#686868"
-      ),
-      continuous.primary = function(n) { scales::gradient_n_pal(c("white", spot.primary.light, spot.primary))((1:n)/n) },
-      continuous.secondary = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
-      continuous = continuous.primary,
-      reference = "grey70",
-      baseline = "black"
-    )))
-}
+style_atlas_cmyk <- purrr::partial(style_atlas, is.cmyk=TRUE)
 
 
 #' @export
-style_atlas_open <- function(textsize=7) {
-  style_atlas(textsize=textsize, family="Nunito Sans", family.bold = "Nunito Sans")
+style_atlas_open <- function(textsize=7, ...) {
+  style_atlas(textsize=textsize, family="Nunito Sans", family.bold = "Nunito Sans", ...)
 }
 
 
@@ -324,4 +249,9 @@ style_worldbank.org <- function(textsize=7) {
       )
     )
   ))
+}
+
+geom_text_styled <- function(...) {
+  params = list(...)
+
 }

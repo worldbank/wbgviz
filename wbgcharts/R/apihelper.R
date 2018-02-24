@@ -53,7 +53,14 @@ create_wbgref <- function() {
   wbgref$countries <- list(
     iso2c = countries_df$iso2c,
     iso3c = countries_df$iso3c,
-    labels = setNames(trimws(countries_df$country), countries_df$iso3c),
+    labels = as.vector(modifyList(
+      as.list(setNames(trimws(countries_df$country), countries_df$iso3c)),
+      list(
+#        CIV = "Côte d\u2019Ivoire",
+#        FRO = "Faeroe Islands",
+#        STP = "São Tomé and Príncipe"
+      ))
+    ),
     iso2to3 = countries_df %>% select(iso2c, iso3c),
     regions = countries_df %>% select(iso3c, region_iso3c = regionID),
     incomegroups = countries_df %>% select(iso3c, income_iso3c = incomeID)
