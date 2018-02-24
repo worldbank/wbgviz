@@ -56,9 +56,9 @@ create_wbgref <- function() {
     labels = as.vector(modifyList(
       as.list(setNames(trimws(countries_df$country), countries_df$iso3c)),
       list(
-#        CIV = "Côte d\u2019Ivoire",
-#        FRO = "Faeroe Islands",
-#        STP = "São Tomé and Príncipe"
+        CIV = "Côte d\u2019Ivoire",
+        FRO = "Faeroe Islands",
+        STP = "São Tomé and Príncipe"
       ))
     ),
     iso2to3 = countries_df %>% select(iso2c, iso3c),

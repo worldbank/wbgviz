@@ -20,7 +20,8 @@ Imports: ggplot2,
     tidyr,
     digest,
     rappdirs,
-    stringr
+    stringr,
+    RGraphics
 Suggests: png,
     extrafont,
     knitr,
