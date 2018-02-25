@@ -276,6 +276,7 @@ wbg_source <- function(indicatorIDs, source = NULL) {
   return(sources)
 }
 
+#' @export
 endashify <- function(s) {
   gsub("-", "–", s)
 }
