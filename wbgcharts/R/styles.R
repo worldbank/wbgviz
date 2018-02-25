@@ -42,9 +42,14 @@ style_base <- function(textsize=7) {
         panel.grid.major.x = theme_minimal()$panel.grid.major.x
       )
     },
+    theme_x_title = function() {
+      theme(
+        axis.title.x = element_text(margin = margin(1,0,0,0,"lines"))
+      )
+    },
     theme_scatter = function() {
       theme(
-        axis.title.x.bottom = element_text(margin = margin(1,0,0,0,"lines")),
+        axis.title.x = element_text(margin = margin(1,0,0,0,"lines")),
         panel.grid.major.x = NULL
       )
     },
@@ -77,6 +82,8 @@ style_base <- function(textsize=7) {
 #' @export
 style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir Heavy", is.cmyk = FALSE) {
   modifyList(style_base(textsize), listy(
+    ## FONTY STUFF #############################################################
+    family = family,
     ## COLORS ##################################################################
     colors = listy(
       neutral                  = "grey80",
@@ -152,6 +159,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
       reference = "longdash",
       baseline = "solid"
     ),
+    linesize = 0.8,
     arrow = function(ends = "last") { grid::arrow(length = unit(1.5, "mm"), type = "closed", ends = ends) },
 
     ## SHAPES & LINES ##########################################################
@@ -183,7 +191,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
               legend.background    = element_rect(fill = "white", color = NA),
               legend.position      = "none",
               strip.placement      = "outside",
-              plot.margin          = margin(1,1,5,0, unit = "mm") #trbl
+              plot.margin          = margin(1,1,5,1, unit = "mm") #trbl
         )
     }
   ))

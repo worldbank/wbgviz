@@ -226,8 +226,8 @@ add_captions <- function(plot, theme, title = NULL, subtitle = NULL, note = NULL
       grobHeight(grob_title)+unit(0.13*!is.null(title), "in"),
       grobHeight(grob_subtitle)+unit(0.1*!is.null(subtitle), "in"),
       unit(1, "null"),
-      grobHeight(grid.force(grob_note))+unit(0.07*!is.null(note), "in"),
-      grobHeight(grob_source)+unit(0.07*!is.null(source), "in"),
+      grobHeight(grid.force(grob_note))+unit(0.08*!is.null(note), "in"),
+      grobHeight(grob_source)+unit(0.08*!is.null(source), "in"),
       max(grobHeight(grob_source_url), grobHeight(grob_logo$children[[1]]))
     ),
     vp = vp
