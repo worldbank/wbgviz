@@ -212,8 +212,11 @@ figure_save_final_pdf <- function (fig, style, filename, width = 1500/96/2, heig
 
   # We use the pdf device and not quartz or cairo as neither support cmyk color model. However
   # pdf has bad unicode support and forces everything to single byte encoding. The standard latin
-  # encoding does not support curly quotes, but
-  pdf(paste0(filename, ".pdf"), width = width, height = height, colormodel = colormodel, encoding = "MacRoman", ...)
+  # encoding does not support curly quotes, but this MacRoman one seems to.
+  #
+  # Also, see ?pdf for useDingbats - unfortunately for stroked shape = 21, this is rendered inconsistently,
+  # so we fall back on actual circles and hope that will work.
+  pdf(paste0(filename, ".pdf"), width = width, height = height, colormodel = colormodel, encoding = "MacRoman", useDingbats = FALSE, ...)
 
   p <- fig$plot(style())
   f <- add_captions(

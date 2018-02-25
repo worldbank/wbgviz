@@ -137,14 +137,25 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
 
     ## SHAPES & LINES ##########################################################
     shapes = list(
-      categorical = c(
-        19,
-        19,
-        1,
-        1,
-        1
+      point = 19,
+      incomes = c(
+        HIC                    = 21,
+        UMC                    = 21,
+        LMC                    = 1,
+        LIC                    = 1
       )
+      #categorical = c(
+      #  19,
+      #  19,
+      #  1,
+      #  1,
+      #  1
+      #)
     ),
+    point_size = 2,
+    point_stroke = 0,
+    point_stroked_stroke = 1,
+    point_stroked_size = point_size - point_stroked_stroke,
     linetypes = list(
       regions = c(
         EAS = "solid",
