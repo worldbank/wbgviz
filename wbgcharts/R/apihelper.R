@@ -276,9 +276,55 @@ wbg_source <- function(indicatorIDs, source = NULL) {
   return(sources)
 }
 
-#' @export
-wbg_name <- function(indicatorID) {
-  wdi_ind <- get_wbcache()$indicators
+endashify <- function(s) {
+  gsub("-", "–", s)
+}
 
-  return(wdi_ind$indicator[wdi_ind$indicatorID == indicatorID])
+#' @export
+wbg_name_mrv <- function(years) {
+  paste0("most recent value in ",min(years),"–",max(years))
+}
+
+#' @export
+wbg_name <- function(indicatorID, indicator, by, year, mrv, denom) {
+  if (!missing(indicatorID) && !missing(indicator)) {
+    stop("Provide either indicatorID to lookup name, or indicator to custom build - not both.")
+  }
+
+  if (!missing(mrv)) {
+    year = wbg_name_mrv(mrv)
+  }
+
+  if (!missing(indicatorID)) {
+    wdi_ind <- get_wbcache()$indicators
+    ind_name <- wdi_ind$indicator[wdi_ind$indicatorID == indicatorID]
+
+    m <- regexpr("(?<stem>[^\\(]+)\\((?<paren>[^\\)]+)\\)",ind_name, perl=TRUE)
+    if (m == -1) {
+      stem <- ind_name
+      paren <- NULL
+    } else {
+      stem <- substr(ind_name, attr(m, "capture.start")[1], attr(m, "capture.start")[1]+attr(m, "capture.length")[1]-1)
+      stem <- trimws(stem)
+      paren <- substr(ind_name, attr(m, "capture.start")[2], attr(m, "capture.start")[2]+attr(m, "capture.length")[2]-1)
+
+      if (attr(m, "match.length") < nchar(ind_name)) {
+        warning(paste0("wbg_name() may be losing indicator name information for ",indicatorID,". Check this."))
+      }
+    }
+  } else {
+    stem <- indicator
+    paren <- NULL
+  }
+
+  if (!missing(denom)) {
+    paren <- denom
+  }
+
+  return(paste0(
+    stem,
+    if (!missing(by)) paste0(", ", by),
+    if (!missing(year)) paste0(", ", endashify(year)),
+    if (!is.null(paren)) paste0(" (", paren, ")")
+  ))
 }
