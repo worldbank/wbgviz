@@ -30,6 +30,77 @@ billions = label_divide(9)
 #' @export
 trillions = label_divide(12)
 
+#' A breaks function for ggplot2 scales that shows the data limits
+#'
+#' This builds on the standard ggplot2 continuous breaks (extended breaks)
+#' function to make sure the data limits, given as a parameter, are included
+#' in the breaks.
+#'
+#' By default it will try to use the limits ggplot provides, but by default those
+#' are extended by the expand argument of scales, so it will use the integral
+#' ceiling and floor respectively of these. Usually this will work. If not you
+#' can provide limits to override.
+#'
+#' @param limits A pair of limits, overrides the default
+#' @param at To limit the breaks to be on 5s, 10s, etc (more of a hint)
+#' @param closeness_threshold If one of the data limit breaks and one of the
+#'        default breaks will be closer than closeness_threshold * the ggplot2
+#'        calculated limits, the the nearby default break will be dropped.
+#'
+#' @example
+#' library(ggplot2)
+#' library(dplyr)
+#'
+#' housing <- txhousing %>%
+#'   filter(month == 1, year > 2001, year < 2015)
+#'
+#' # Standard extended_breaks don't look great on this example
+#' p <- ggplot(housing, aes(year, volume, color = city)) +
+#'   geom_line() +
+#'   theme(legend.position="none")
+#' p
+#'
+#' # Bracketed breaks work nicely
+#' p + scale_x_continuous(breaks = bracketed_breaks())
+#' @export
+bracketed_breaks <- function(limits, at = 1, closeness_threshold = 0.1, breaker = scales::extended_breaks()) {
+  if (missing(limits)) {
+    limits <- NULL
+  } else {
+    limits <- range(limits, na.rm=TRUE)
+  }
+  if (missing(at)) {
+    at <- NULL
+  }
+
+  function(x) {
+    if (is.null(limits)) {
+      limits <- c(ceiling(x[1]), floor(x[2]))
+    }
+
+    mingap <- diff(x) * closeness_threshold
+
+    if (!is.null(at)) {
+      x <- range(x)/at
+      x[1] <- floor(x[1])*at
+      x[2] <- ceiling(x[2])*at
+    }
+
+    inner <- breaker(x)
+    inner <- inner[inner > limits[1] & inner < limits[2]]
+
+    if (inner[1] - limits[1] < mingap) {
+      inner <- inner[-1]
+    }
+
+    if (limits[2] - inner[length(inner)] < mingap) {
+      inner <- inner[-length(inner)]
+    }
+
+    sort(c(limits, inner))
+  }
+}
+
 # = Pretty simple "compound" geoms =============================================
 
 #' TODO: option to only line adjacent areas with same fill

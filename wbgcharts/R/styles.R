@@ -132,7 +132,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
       baseline                 = "black",
       continuous.primary       = function(n) {
         g <- scales::gradient_n_pal(c("white", spot.primary.light, spot.primary), values = c(0, 0.55, 1))
-        max_pale <- 0.15
+        max_pale <- 0.20
         if      (n == 1) g(c(1))
         else if (n == 2) g(c(0.55, 1))
         else             g(max_pale + (0:(n-1))/(n-1)*(1 - max_pale))
@@ -161,7 +161,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
     point_size = 2,
     point_stroke = 0,
     point_stroked_stroke = 1,
-    point_stroked_size = point_size - point_stroked_stroke,
+    point_stroked_size = 0.75,
     linetypes = list(
       regions = c(
         EAS = "solid",
