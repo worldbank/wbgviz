@@ -27,7 +27,17 @@ Note that by default `install_github` does not create vignettes - you can enable
 
 ## Font installation
 
-To use styles, you need to have font dependencies. One (Avenir) is a commerical license so we can't distribute with the package. However `style_atlas_open` and `style_worldbank.org` use open fonts that can be installed using:
+To use styles, you need to have font dependencies. One (Avenir) is a commerical license so we can't distribute with the package. Assuming it is already installed on your system, the following may work:
+```
+font_import()
+```
+This will take a while. When it completes, see if Avenir is now included in the font list by examing:
+```
+View(fonttable()
+```
+Chances are, it won't work, because Avenir is wrapped up in a `.ttc` file that `extrafont` doesn't recognise. Various tools will extract `.ttc` files into `.ttf` files, or you can ask @EconAndrew for the pre-extracted fonts (if you have a license).
+
+If you don't have Avenir, `style_atlas_open` and `style_worldbank.org` substitute similar open fonts that can be installed using:
 ```
 install.packages("extrafont")
 font_import(system.file("fonts", package = "wbgcharts"))
