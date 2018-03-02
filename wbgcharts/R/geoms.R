@@ -9,12 +9,17 @@ dp <- Vectorize(function(x) {
   }
 })
 
-label_divide <- function(scale, big.mark = ",") {
-  function(precision = NULL) {
+label_divide <- function(scale) {
+  function(precision = NULL, big.mark = ",", always.signed = FALSE) {
     function(label) {
       scaled_values <- label / (10^scale)
       digits <- if (is.null(precision)) max(dp(scaled_values), na.rm = TRUE) else precision
-      format(round(scaled_values, digits = digits), nsmall = digits, scientific = FALSE, big.mark = big.mark)
+      strs <- format(round(scaled_values, digits = digits), nsmall = digits, scientific = FALSE, big.mark = big.mark)
+      strs <- trimws(strs)
+      if (always.signed) {
+        strs <- paste0(ifelse(scaled_values > 0, "+", ""), strs)
+      }
+      strs
     }
   }
 }
