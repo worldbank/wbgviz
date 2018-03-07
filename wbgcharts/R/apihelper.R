@@ -53,7 +53,7 @@ create_wbgref <- function() {
   wbgref$countries <- list(
     iso2c = countries_df$iso2c,
     iso3c = countries_df$iso3c,
-    labels = as.vector(modifyList(
+    labels = unlist(modifyList(
       as.list(setNames(trimws(countries_df$country), countries_df$iso3c)),
       list(
         CIV = "Côte d\u2019Ivoire",
