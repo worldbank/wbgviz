@@ -279,7 +279,7 @@ GeomCustomPoint <- ggproto("GeomPoint", GeomPoint,
                            non_missing_aes = c("size", "shape", "colour"),
                            default_aes = aes(
                              shape = 19, colour = "black", size = 1.5, fill = NA,
-                             alpha = NA, stroke = 0.5, hflip = FALSE
+                             alpha = NA, stroke = 0.5, hflip = FALSE, hjust = 0.5
                            ),
 
                            draw_panel = function(data, panel_params, coord, custom.shapes = list(), flip.legend = FALSE, na.rm = FALSE) {
@@ -306,7 +306,7 @@ GeomCustomPoint <- ggproto("GeomPoint", GeomPoint,
                                                   custom.coords$x, custom.coords$y,
                                                   pgrobs = custom.shapes[match(custom.coords$shape, names(custom.shapes))],
                                                   hflip = custom.coords$hflip,
-                                                  hjust = 1,
+                                                  hjust = custom.coords$hjust,
                                                   size = unit(custom.coords$size, "mm"),
                                                   gp = gpar(
                                                     col = alpha(custom.coords$colour, custom.coords$alpha),
