@@ -65,6 +65,7 @@ style_base <- function(textsize=7) {
           legend.margin = margin(0,0,0,0.5, "lines")
         ),
         righttop = right + theme(legend.justification = c(0.5, 1)),
+        rightbottom = right + theme(legend.justification = c(0.5, 0)),
         bottom = theme(
           legend.position = "bottom",
           legend.margin = margin(0.3,0,0,0, "lines")
