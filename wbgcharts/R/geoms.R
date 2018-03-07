@@ -125,19 +125,62 @@ geom_percent_col <- function(mapping = aes(), fill = NULL, fill.bg = "gray80", .
   )
 }
 
+#' A geom for the other kind of dotplot, with a connecting line
+#'
+#' This is still a fairly hacky way to make dotplots, so you have to observe
+#' and obey some weirdness, which is outlined below. Also, the "direction"
+#' (usually time) of the data is dictated by the row ordering in the data frame,
+#' so make sure it is sorted correctly.
+#'
+#' @param mapping Complicatedly, you must specify x (the value axis), y (the
+#'   categorical axis) and group in the geom's own mapping argument, even if
+#'   you specify them in the main ggplot() call. If the chart is faceted, you
+#'   need to also include the facetting variable as part of the group (use paste0).
+#' @param linecolor The color of the grouping line
+#' @param linesize The size of the grouping line
+#' @param arrow NA or FALSE for no arrow, TRUE for a standard arrow, or pass
+#'   a grob for something weird and wonderful. For reverse direction groups, the
+#' @param flip.legend By default the legend will show the arrow facing forward,
+#'   but if most the groups run backwards it may be helpful to show the arrow
+#'   backwards too, so you can set this to TRUE to do that.
+#' @param size The size of the points & arrows if used.
+#'
 #' @export
-geom_other_dotplot <- function(mapping = aes(), color.line = "black", size.line = 0.25, arrow = NULL, ...) {
+geom_other_dotplot <- function(mapping = aes(), linecolor = "black", linesize = 0.25, arrow = NA, flip.legend = FALSE, size = 1,...) {
   # TODO break apart both mapping and ... so that anything with .line suffix is sent
   # to line geom, and the rest to point geom.
   if (is.null(mapping$y)) {
-    stop("Must provide y aesthetic directly in geom_other_dotplot even if its in ggplot call.")
+    stop("Must provide x aesthetic directly in geom_other_dotplot even if its in ggplot call.")
   }
-  c(
-    geom_line(
+
+  flipper <- function(df) {
+    df %>% group_by(!! mapping$group) %>% mutate(hflip = last(!! mapping$x) < first(!! mapping$x))
+  }
+
+  layers <- c(
+    geom_path(
       modifyList(mapping, setNames(mapping["y"], "group")),
-      color = color.line, size = size.line, arrow = arrow, ...),
-    geom_point(mapping, ...)
+      color = linecolor, size = linesize, ...)
   )
+
+  if (!is.na(arrow) && arrow != FALSE) {
+    if (arrow == TRUE) {
+      arrow <- grid::polygonGrob(x = c(0.2,1,0.2,0.2), y = c(0, 0.5, 1, 0))
+    }
+    layers <- c(
+      layers,
+      geom_custom_point(
+        aes(hflip = hflip),
+        data = flipper,
+        custom.shapes = list(`99` = arrow),
+        size = size,
+        flip.legend = flip.legend
+      )
+    )
+  } else {
+    layers <- c(layers, geom_point(mapping, size = size, ...))
+  }
+  layers
 }
 
 #' @export
@@ -162,6 +205,141 @@ geom_other_dotplot_label <- function(mapping = aes(), data = NULL, side = "left"
 }
 
 # = Geoms built "from scratch" =================================================
+
+# - customPoints ---------------------------------------------------------------
+
+#' @export
+customPointsGrob <- function (x, y, pgrobs, hflip = FALSE, vflip = FALSE, hjust = 0.5,
+                              size = unit(1, "char"), default.units = "native", name = NULL,
+                              gp = gpar(), vp = NULL)
+{
+  if (!is.unit(x))
+    x <- unit(x, default.units)
+  if (!is.unit(y))
+    y <- unit(y, default.units)
+  grob(x = x, y = y, pch = 1,
+       pgrobs = pgrobs, hflip = hflip, vflip = vflip, hjust = hjust,
+       size = size, name = name, gp = gp,
+       vp = vp, cl = "custompoints")
+}
+
+#' @method drawDetails custompoints
+#' @export
+drawDetails.custompoints <- function(x, recording = TRUE) {
+  if (length(x$size) == 1) x$size <- rep(x$size, length(x$pgrobs))
+  if (length(x$hflip) == 1) x$hflip <- rep(x$hflip, length(x$pgrobs))
+  if (length(x$vflip) == 1) x$vflip <- rep(x$vflip, length(x$pgrobs))
+  if (length(x$hjust) == 1) x$hjust <- rep(x$hjust, length(x$pgrobs))
+  if (length(x$gp) == 1) x$gp <- rep(x$gp, length(x$pgrobs))
+  for (i in 1:length(x$pgrobs)) {
+    pushViewport(viewport(
+      x = x$x[i], y = x$y[i],
+      width=(0.5 - x$hflip[i])*2 * x$size[i],
+      height=(0.5 - x$vflip[i])*2 * x$size[i],
+      just = x$hjust[i],
+      gp = x$gp[i]
+    ))
+    grid::grid.draw(grid::forceGrob(x$pgrobs[[i]]))
+    popViewport()
+  }
+}
+
+#' @export
+geom_custom_point <- function(mapping = NULL, data = NULL,
+                              stat = "identity", position = "identity",
+                              ...,
+                              na.rm = FALSE,
+                              show.legend = NA,
+                              custom.shapes = list(),
+                              flip.legend = FALSE,
+                              inherit.aes = TRUE) {
+  layer(
+    data = data,
+    mapping = mapping,
+    stat = stat,
+    geom = GeomCustomPoint,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      custom.shapes = custom.shapes,
+      flip.legend = flip.legend,
+      na.rm = na.rm,
+      ...
+    )
+  )
+}
+
+#' @rdname ggplot2-ggproto
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomCustomPoint <- ggproto("GeomPoint", GeomPoint,
+                           required_aes = c("x", "y"),
+                           non_missing_aes = c("size", "shape", "colour"),
+                           default_aes = aes(
+                             shape = 19, colour = "black", size = 1.5, fill = NA,
+                             alpha = NA, stroke = 0.5, hflip = FALSE
+                           ),
+
+                           draw_panel = function(data, panel_params, coord, custom.shapes = list(), flip.legend = FALSE, na.rm = FALSE) {
+                             custom.data <- data %>% filter(shape %in% names(custom.shapes))
+                             default.data <- data %>% filter(!(shape %in% names(custom.shapes)))
+
+                             custom.coords <- coord$transform(custom.data, panel_params)
+                             default.coords <- coord$transform(default.data, panel_params)
+
+                             ggplot2:::ggname("geom_custom_point",
+                                              grobTree(
+                                                pointsGrob(
+                                                  default.coords$x, default.coords$y,
+                                                  pch = default.coords$shape,
+                                                  gp = gpar(
+                                                    col = alpha(default.coords$colour, default.coords$alpha),
+                                                    fill = alpha(default.coords$fill, default.coords$alpha),
+                                                    # Stroke is added around the outside of the point
+                                                    fontsize = default.coords$size * .pt + default.coords$stroke * .stroke / 2,
+                                                    lwd = default.coords$stroke * .stroke / 2
+                                                  )
+                                                ),
+                                                customPointsGrob(
+                                                  custom.coords$x, custom.coords$y,
+                                                  pgrobs = custom.shapes[match(custom.coords$shape, names(custom.shapes))],
+                                                  hflip = custom.coords$hflip,
+                                                  hjust = 1,
+                                                  size = unit(custom.coords$size, "mm"),
+                                                  gp = gpar(
+                                                    col = alpha(custom.coords$colour, custom.coords$alpha),
+                                                    fill = alpha(custom.coords$fill, custom.coords$alpha),
+                                                    # Stroke is added around the outside of the point
+                                                    fontsize = custom.coords$size * .pt + custom.coords$stroke * .stroke / 2,
+                                                    lwd = custom.coords$stroke * .stroke / 2
+                                                  )
+                                                )
+                                              )
+                             )
+                           },
+
+                           draw_key = function (data, params, size)
+                           {
+                             custom.shapes <- params$custom.shapes
+                             if (data$shape[1] %in% names(custom.shapes)) {
+                               customPointsGrob(
+                                 0.5, 0.5,
+                                 pgrobs = custom.shapes[match(data$shape, names(custom.shapes))],
+                                 hflip = params$flip.legend,
+                                 gp = gpar(
+                                   col = alpha(data$colour, data$alpha),
+                                   fill = alpha(data$fill, data$alpha),
+                                   fontsize = data$size * .pt + data$stroke * .stroke/2,
+                                   lwd = data$stroke * .stroke/2
+                                 )
+                               )
+                             } else {
+                               ggplot2::draw_key_point(data, params, size)
+                             }
+                           }
+)
 
 # - wrapText -------------------------------------------------------------------
 
