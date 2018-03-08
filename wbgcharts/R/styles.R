@@ -178,6 +178,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
       baseline = "solid"
     ),
     linesize = 0.8,
+    linesize_reference = 0.4,
     arrow = function(ends = "last") { grid::arrow(length = unit(1.5, "mm"), type = "closed", ends = ends) },
 
     ## SHAPES & LINES ##########################################################
