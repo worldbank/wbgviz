@@ -283,7 +283,7 @@ endashify <- function(s) {
 
 #' @export
 wbg_name_mrv <- function(years) {
-  paste0("most recent value in ",min(years),"–",max(years))
+  paste0("most recent value in ",min(years, na.rm = TRUE),"–",max(years, na.rm = TRUE))
 }
 
 #' @export
