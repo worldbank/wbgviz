@@ -454,16 +454,36 @@ count_lines <- function(strings) {
 #' longest string and "height" will jointly determine the width, which will then
 #' be applied to the other strings - so that strings are not unnecessarily wrapped.
 #'
+#' @param force Force strings to take up \code{lines} lines, even if they could
+#'  fit the width with fewer lines
+#'
 #' @export
-str_wrap_lines <- function(strings, lines = 2, indent = 0, exdent = 0) {
-  # Calculate the necessary width for a two line wrap - it has to be at least as
-  # large as 1/lines the longest string
-  width <- max(round(nchar(wbgref$regions$labels)/lines))
-  while (TRUE) {
-    wrapped <- stringr::str_wrap(strings, width, indent, exdent)
-    wrapped.lines <- count_lines(wrapped)
-    if (max(wrapped.lines) <= lines) break
-    width <- width + 1
+str_wrap_lines <- function(strings, lines = 2, indent = 0, exdent = 0, force = FALSE) {
+  if (force) {
+    wrapped <- sapply(strings, function(s) {
+      # Calculate the necessary width for a `lines` line wrap - it has to be at least as
+      # large as 1/lines the string (pigeonhole principle). Start here...
+      width <- round(nchar(s)/lines)
+
+      while (TRUE) {
+        w <- stringr::str_wrap(s, width, indent, exdent)
+        w.lines <- count_lines(w)
+        if (w.lines <= lines) break # less than or equal as there may be no solution
+        width <- width + 1
+      }
+      w
+    })
+  } else {
+    # Calculate the necessary width for a `lines`` line wrap - it has to be at least as
+    # large as 1/lines the longest string (pigeonhole principel). Start here...
+    width <- max(round(nchar(strings)/lines))
+
+    while (TRUE) {
+      wrapped <- stringr::str_wrap(strings, width, indent, exdent)
+      wrapped.lines <- count_lines(wrapped)
+      if (max(wrapped.lines) <= lines) break
+      width <- width + 1
+    }
   }
   setNames(wrapped, names(strings))
 }
