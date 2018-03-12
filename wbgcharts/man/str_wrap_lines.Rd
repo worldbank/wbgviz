@@ -4,7 +4,12 @@
 \alias{str_wrap_lines}
 \title{Wrap a vector of strings to a specified number of lines}
 \usage{
-str_wrap_lines(strings, lines = 2, indent = 0, exdent = 0)
+str_wrap_lines(strings, lines = 2, indent = 0, exdent = 0,
+  force = FALSE)
+}
+\arguments{
+\item{force}{Force strings to take up \code{lines} lines, even if they could
+fit the width with fewer lines}
 }
 \description{
 Like \code{stringr::str_wrap()} except that instead of specifying a width you

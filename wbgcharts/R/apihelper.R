@@ -76,6 +76,27 @@ create_wbgref <- function() {
     iso2to3 = regions_df[,c("iso2c", "iso3c")]
   )
 
+  regions_excl_high_income_iso3c <- c(
+    "EAS" = "EAP",
+    "ECS" = "ECA",
+    "LCN" = "LAC",
+    "MEA" = "MNA",
+    "SAS" = "SAS",
+    "SSF" = "SSA"
+  )
+
+  regions_excl_high_income_df <- wb_newcache$countries %>%
+    filter(iso3c %in% regions_excl_high_income_iso3c)
+
+  wbgref$regions_excl_high_income <- list(
+    iso2c = regions_excl_high_income_df$iso2c,
+    iso3c = regions_excl_high_income_df$iso3c,
+    labels = setNames(trimws(regions_excl_high_income_df$country), regions_excl_high_income_df$iso3c),
+    labels_2line = setNames(trimws(sub(" (", "\n(", regions_excl_high_income_df$country, fixed = TRUE)), regions_excl_high_income_df$iso3c),
+    regions = data.frame(iso3c = regions_excl_high_income_iso3c, region_iso3c = names(regions_excl_high_income_iso3c), stringsAsFactors = FALSE),
+    iso2to3 = regions_excl_high_income_df[,c("iso2c", "iso3c")]
+  )
+
   incomes_df <- wb_newcache$countries %>%
     filter(iso3c %in% c("HIC", "UMC", "LMC", "LIC")) %>%
     arrange(match(iso3c, c("HIC", "UMC", "LMC", "LIC")))
@@ -282,8 +303,13 @@ endashify <- function(s) {
 }
 
 #' @export
+str_range <- function(x) {
+  paste0(min(x, na.rm = TRUE),"–",max(x, na.rm = TRUE))
+}
+
+#' @export
 wbg_name_mrv <- function(years) {
-  paste0("most recent value in ",min(years, na.rm = TRUE),"–",max(years, na.rm = TRUE))
+  paste0("most recent value in ",str_range(years))
 }
 
 #' @export
