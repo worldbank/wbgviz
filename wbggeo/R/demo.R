@@ -1,5 +1,11 @@
 #' @export
-wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1, fill.values = NULL) {
+wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1, fill.values = NULL, na.in.legend = TRUE) {
+  if (!na.in.legend) {
+    breaks <- unique(data[[variable]])
+    breaks <- breaks[!is.na(breaks)]
+  } else {
+    breaks <- NULL
+  }
   p <- ggplot() +
     geom_map(data = data, aes_string(map_id = iso3c, fill = variable), map = maps$countries) +
     geom_polygon(data = maps$disputed, aes(long, lat, group = group, map_id = id), fill = "grey80") +
@@ -8,9 +14,9 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
     scale_x_continuous(expand = c(0, 0), limits = standard_crop_wintri()$xlim) +
     scale_y_continuous(expand = c(0, 0), limits = standard_crop_wintri()$ylim) + {
       if (is.null(fill.values)) {
-        scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", labels = rename_na("No data"), drop = FALSE)
+        scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", breaks = breaks, labels = rename_na("No data"), drop = FALSE)
       } else {
-        scale_fill_manual(values = fill.values, na.value = "grey80", labels = rename_na("No data"), drop = FALSE)
+        scale_fill_manual(values = fill.values, na.value = "grey80", breaks = breaks, labels = rename_na("No data"), drop = FALSE)
       }
     } +
     coord_equal() +
