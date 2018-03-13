@@ -4,7 +4,7 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
     breaks <- unique(data[[variable]])
     breaks <- breaks[!is.na(breaks)]
   } else {
-    breaks <- NULL
+    breaks <- waiver()
   }
   p <- ggplot() +
     geom_map(data = data, aes_string(map_id = iso3c, fill = variable), map = maps$countries) +
