@@ -188,7 +188,7 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
               line                 = element_line(size = 0.35),
               panel.grid.major.x   = element_blank(), panel.grid.minor.x = element_blank(),
               panel.grid.minor.y   = element_blank(),
-              plot.caption         = element_text(hjust=0, size=rel(6/7), lineheight = 1, margin=margin(1.5,0,0,0, unit="line"), color= "grey60"),
+              plot.caption         = element_text(hjust=0, size=rel(6/7), lineheight = 1, margin=margin(1.5,0,0,0, unit="line"), color= if (is.cmyk) "grey60" else "black"),
               plot.title           = element_text(hjust=0, size=rel(10/7), lineheight = 1, family=family.bold, face="bold", color = "black"),
               plot.subtitle        = element_text(hjust=0, size=rel(8/7), lineheight = 1, color=colors$text),
               strip.text           = element_text(hjust = 0, size=rel(1.0), lineheight = 1, color=colors$text), # strip text is NOT kind of like subtitle text
