@@ -303,13 +303,40 @@ endashify <- function(s) {
 }
 
 #' @export
-str_range <- function(x) {
-  paste0(min(x, na.rm = TRUE),"–",max(x, na.rm = TRUE))
+str_range <- function(x, shorten=FALSE) {
+  minx = min(x, na.rm = TRUE)
+  maxx = max(x, na.rm = TRUE)
+  if (shorten && floor(log(minx,10)) == floor(log(maxx,10))) {
+    minx = as.character(minx)
+    maxx = as.character(maxx)
+
+    # default is to allow any shortening
+    if (isTRUE(shorten))
+      shorten = c(1, nchar(maxx)-1)
+
+    # find common prefix
+    min.char <- min(nchar(minx), nchar(maxx))
+    i <- 1
+    while (i < min.char) {
+      if (substr(minx, 1, i) != substr(maxx, 1, i))
+        break
+      i <- i + 1
+    }
+
+    # but be limited by retain.digits
+    if (nchar(maxx) - i + 1 > shorten[2]) {
+      i <- 1
+    } else if (nchar(maxx) - i + 1 < shorten[1]) {
+      i = max(nchar(maxx) - shorten[1] + 1, 1)
+    }
+    maxx <- substr(maxx, i, nchar(maxx))
+  }
+  paste0(minx,"–",maxx)
 }
 
 #' @export
 wbg_name_mrv <- function(years) {
-  paste0("most recent value in ",str_range(years))
+  paste0("most recent value in ",str_range(years, shorten = c(2, 2)))
 }
 
 #' @export
