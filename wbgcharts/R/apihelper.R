@@ -135,15 +135,25 @@ wbgdata_from_databank <- function(country = "all", indicator, startdate, enddate
   df <- df %>%
     select(iso3c=`Country Code`,indicatorID=`Series Code`, date=`Time`, value=`Value`)
 
+  # Check & filter indicators
   if (!(all(indicator %in% df$indicatorID)))
     stop("Databank file does not match API call (indicators)")
 
+  df <- df %>% filter(indicatorID %in% indicator)
+
+  # Check & filter dates
   if (!(all(c(startdate,enddate) %in% df$date)))
     warning("Databank file does not contain start/end dates")
 
-  #FIXME check & filter countries too
+  df <- df %>% filter(date >= startdate, date <= enddate)
 
-  df %>% filter(indicatorID %in% indicator, date >= startdate, date <= enddate)
+  # Check & filter countries if explicitly listed
+  if (length(country) > 1 || !(country %in% c("aggregates", "countries_only", "all"))) {
+    if (!(all(country %in% df$iso3c)))
+      warning("Databank file does not contain all requested countries")
+
+    df <- df %>% filter(iso3c %in% country)
+  }
 }
 
 wbgdata_to_databank <- function(df, filename) {
@@ -174,7 +184,7 @@ wbgdata_build_cache_filename <- function(country, indicator, startdate, enddate)
 #' @param col.indicator if true, return the indicator (description) column
 #' @param cache the wbstats cache object to use (default usually ok)
 #' @param indicator.wide return the indicators in wide (not long) format
-#' @param offline (experimental)
+#' @param offline (experimental) can be "none", "only", "warn" or "overwrite"
 #' @param rename.indicators see \code{indicator} paramater
 #' @inheritParams wbstats::wb
 #'
@@ -182,6 +192,7 @@ wbgdata_build_cache_filename <- function(country, indicator, startdate, enddate)
 wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
                    col.indicator = FALSE, cache = get_wbcache(),
                    indicator.wide = TRUE, removeNA = FALSE, offline="none",
+                   offline.file,
                    rename.indicators = FALSE) {
   if (!missing(years)) {
     if (!missing(startdate) | !missing(enddate)) {
@@ -192,7 +203,11 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
   }
   offline_path <- ".wbgdata"
   if (offline != "none") {
-    offline_file <- file.path(offline_path, wbgdata_build_cache_filename(country, indicator, startdate, enddate))
+    if (missing(offline.file)) {
+      offline_file <- file.path(offline_path, wbgdata_build_cache_filename(country, indicator, startdate, enddate))
+    } else {
+      offline_file <- offline.file
+    }
     if (file.exists(offline_file)) {
       offline_df <- wbgdata_from_databank(country, indicator, startdate, enddate, filename = offline_file)
     } else {

@@ -231,3 +231,39 @@ figure_save_final_pdf <- function (fig, style, filename, width = 1500/96/2, heig
   grid::grid.draw(f)
   dev.off()
 }
+
+#' @export
+figure_save_final_pdf_cairo <- function (fig, style, filename, width = 1500/96/2, height = NULL, padding = margin(0,0,0,0,"pt"), ...){
+  # Temporary fix
+  filename <- tools::file_path_sans_ext(filename)
+
+  if (is.null(height)) {
+    height <- width/fig$aspect_ratio
+  }
+
+  # We use the Cairo device because it has much better character set support
+  # Then post process to CMYK using ghostscript
+  cairo_pdf(paste0(filename, ".pdf"), width = width, height = height, ...)
+
+  p <- fig$plot(style())
+  f <- add_captions(
+    p,
+    if (is.null(fig$theme)) p$theme else fig$theme,
+    title = fig$meta$title,
+    subtitle = fig$meta$subtitle,
+    note = fig$meta$note,
+    source = fig$meta$source,
+    show.logo = FALSE,
+    padding = padding)
+  grid::grid.draw(f)
+  dev.off()
+
+  # Ghostscript plot to convert to CMYK
+  retval <- system2("gs", c(paste0("-o ", filename, ".cmyk.pdf"), "-sDEVICE=pdfwrite","-sColorConversionStrategy=CMYK", "-dEmbedAllFonts=false", "-dProvideUnicode", paste0(filename, ".pdf")), stdout = FALSE)
+  if (retval != 0) {
+    warning("Failed to successfully run ghostscript. Saved PDF will be in RGB not CMYK.")
+  } else {
+    #file.remove(paste0(filename, ".pdf"))
+    #file.rename(paste0(filename, ".pdf.temp"), paste0(filename, ".pdf"))
+  }
+}
