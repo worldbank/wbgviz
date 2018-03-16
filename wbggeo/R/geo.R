@@ -57,9 +57,10 @@ average_color <- function(c1, c2) {
   # If both colors are the same avoid color mismatch caused by rounding error
   if (all(rgb1 == rgb2)) {
     return(c1)
+  } else {
+    # Use gradient function to average in Lab space
+    scales::gradient_n_pal(c(c1, c2), values = c(0, 1))(0.5)
   }
-
-  rgb(t(rgb1+rgb2)/2/256)
 }
 
 disputed_fill <- function(pb, id, newfill = NULL) {
@@ -87,6 +88,8 @@ disputed_fill <- function(pb, id, newfill = NULL) {
 wbg_color_disputed <- function(p) {
   pb <- ggplot_build(p)
 
+  ind <- disputed_fill(pb, "IND")
+  pak <- disputed_fill(pb, "PAK")
   chn_ind <- average_color(disputed_fill(pb, "IND"), disputed_fill(pb, "CHN"))
   ind_pak <- average_color(disputed_fill(pb, "IND"), disputed_fill(pb, "PAK"))
   sdn_ssd <- average_color(disputed_fill(pb, "SDN"), disputed_fill(pb, "SSD"))
@@ -95,10 +98,10 @@ wbg_color_disputed <- function(p) {
   pb <- disputed_fill(pb, "Aksai Chin", chn_ind)
   pb <- disputed_fill(pb, "Demchok", chn_ind)
 
-  pb <- disputed_fill(pb, "Azad Kashmir", ind_pak)
-  pb <- disputed_fill(pb, "Jammu and Kashmir", ind_pak)
-  pb <- disputed_fill(pb, "Northern Areas", ind_pak)
-  pb <- disputed_fill(pb, "Siachen Glacier", ind_pak)
+  #pb <- disputed_fill(pb, "Azad Kashmir", ind_pak)
+  #pb <- disputed_fill(pb, "Jammu and Kashmir", ind_pak)
+  #pb <- disputed_fill(pb, "Northern Areas", ind_pak)
+  #pb <- disputed_fill(pb, "Siachen Glacier", ind_pak)
 
   pb <- disputed_fill(pb, "Abyei", sdn_ssd)
 
