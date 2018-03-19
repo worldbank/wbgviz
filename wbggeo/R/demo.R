@@ -30,9 +30,14 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
 }
 
 #' @export
-wbg_bubble_map <- function(data, maps, style, variable, breaks, iso3c = "iso3c", aspect_ratio = 1, max_size = 1, labels=NULL) {
+wbg_bubble_map <- function(data, maps, style, variable, breaks, iso3c = "iso3c", aspect_ratio = 1, max_size = 1, labels=NULL, all_countries = TRUE) {
+  countries <- maps$countries
+  if (!all_countries) {
+    countries <- countries %>% filter(id %in% data[[iso3c]])
+  }
+
   p <- ggplot(data = data) +
-    geom_polygon(data = maps$countries, aes(long, lat, group = group), fill = "grey80") +
+    geom_polygon(data = countries, aes(long, lat, group = group), fill = "grey80") +
     geom_polygon(data = maps$disputed, aes(long, lat, group = group, map_id = id), fill = "grey80") +
     geom_polygon(data = maps$lakes, aes(long, lat, group = group), fill = "white") +
     geom_path(data = maps$boundaries, aes(long, lat, group = group), color = "white", size = 0.2, lineend = maps$boundaries$lineend, linetype = maps$boundaries$linetype) +

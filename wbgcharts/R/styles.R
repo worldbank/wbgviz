@@ -124,9 +124,10 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
       ),
       categorical = c(
                                  spot.primary,
-                                 spot.primary.light,
                                  spot.secondary,
+                                 spot.primary.light,
                                  spot.secondary.light,
+                                 spot.primary.dark,
                                  spot.secondary.dark
       ),
       reference                = "grey70",
