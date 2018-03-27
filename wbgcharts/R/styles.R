@@ -139,6 +139,11 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         else if (n == 2) g(c(0.55, 1))
         else             g(max_pale + (0:(n-1))/(n-1)*(1 - max_pale))
       },
+      continuous.primary.dark  = function(n) {
+        g <- scales::gradient_n_pal(c("white", spot.primary.light, spot.primary, spot.primary.dark))
+        max_pale <- 0.20
+        g(max_pale + (0:(n-1))/(n-1)*(1 - max_pale))
+      },
       continuous.secondary     = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
       continuous               = continuous.primary
     ),

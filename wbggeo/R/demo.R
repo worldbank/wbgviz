@@ -1,5 +1,5 @@
 #' @export
-wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1, fill.values = NULL, na.in.legend = TRUE) {
+wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1, fill.values = NULL, na.in.legend = TRUE, legend.nrow = NULL) {
   if (!na.in.legend) {
     breaks <- unique(data[[variable]])
     breaks <- breaks[!is.na(breaks)]
@@ -23,6 +23,9 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
     style$theme() +
     style$theme_map(aspect_ratio)
 
+  if (!is.null(legend.nrow)) {
+    p <- p + guides(fill = guide_legend(nrow = legend.nrow))
+  }
 
   pg <- wbg_color_disputed(p)
   pg$theme <- style$theme()
