@@ -8,7 +8,7 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
   }
   p <- ggplot() +
     geom_map(data = data, aes_string(map_id = iso3c, fill = variable), map = maps$countries) +
-    geom_polygon(data = maps$disputed, aes(long, lat, group = group, map_id = id), fill = "grey80") +
+    geom_polygon(data = maps$disputed, aes(long, lat, group = group), fill = "grey80") +
     geom_polygon(data = maps$lakes, aes(long, lat, group = group), fill = "white") +
     geom_path(data = maps$boundaries, aes(long, lat, group = group), color = "white", size = 0.2, lineend = maps$boundaries$lineend, linetype = maps$boundaries$linetype) +
     scale_x_continuous(expand = c(0, 0), limits = standard_crop_wintri()$xlim) +
@@ -41,7 +41,7 @@ wbg_bubble_map <- function(data, maps, style, variable, breaks, iso3c = "iso3c",
 
   p <- ggplot(data = data) +
     geom_polygon(data = countries, aes(long, lat, group = group), fill = "grey80") +
-    geom_polygon(data = maps$disputed, aes(long, lat, group = group, map_id = id), fill = "grey80") +
+    geom_polygon(data = maps$disputed, aes(long, lat, group = group), fill = "grey80") +
     geom_polygon(data = maps$lakes, aes(long, lat, group = group), fill = "white") +
     geom_path(data = maps$boundaries, aes(long, lat, group = group), color = "white", size = 0.2, lineend = maps$boundaries$lineend, linetype = maps$boundaries$linetype) +
     geom_bubble_map(
