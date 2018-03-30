@@ -6,7 +6,8 @@
 \usage{
 wbgdata(country = "all", indicator, startdate, enddate, years, ...,
   col.indicator = FALSE, cache = get_wbcache(), indicator.wide = TRUE,
-  removeNA = FALSE, offline = "none", rename.indicators = FALSE)
+  removeNA = FALSE, offline = "none", offline.file,
+  rename.indicators = FALSE)
 }
 \arguments{
 \item{country}{Character vector of country or region codes. Default value is special code of \code{all}.
@@ -40,7 +41,7 @@ overrides), a vector of years for which to download data.}
 \item{removeNA}{if \code{TRUE}, remove any blank or \code{NA} observations that are returned.
 if \code{FALSE}, no blank or \code{NA} values are removed from the return.}
 
-\item{offline}{(experimental)}
+\item{offline}{(experimental) can be "none", "only", "warn" or "overwrite"}
 
 \item{rename.indicators}{see \code{indicator} paramater}
 }

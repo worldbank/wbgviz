@@ -536,3 +536,58 @@ inv <- function(x) {
 
   setNames(names(x), x)
 }
+
+
+#' Repel the values in a vecto away from each other
+#'
+#' Moves the values in a vector so that they each have gap space between them.
+#' If force is FALSE (default), it will warn and do nothing if this can't be
+#' done within a space of range(x) + c(-gap, gap).
+#'
+#' @export
+repel <- function(x, gap = 1, force = FALSE, err = 0.01) {
+  if (!force && (diff(range(x)) + gap) / (length(x) - 1) < gap) {
+    warning("Can't get a good result. Use force to force.")
+    return(x)
+  }
+
+  o <- order(x)
+  sx <- x[o]
+  sx_in <- sx
+
+  # Easier to work with sorted data so temporarily sort
+  changed <- TRUE
+  iter <- 0
+  while (changed) {
+    if (iter > length(sx)**2) { # Is this thing maximum N^2? It sounds plausible...
+      warning("repel failed after too many iterations")
+      return(x)
+    }
+    iter <- iter + 1
+    changed <- FALSE
+    for (i in 2:length(sx)) {
+      sep <- sx[i] - sx[i-1]
+      midpoint <- (sx[i] + sx[i-1])/2
+      if ((1 + err) * sep < gap) {
+        #print(sx)
+        if (i-1 == 1)
+          if (force)
+            sx[i-1] <- midpoint - gap/2
+          else
+            sx[i-1] <- max(midpoint - gap/2, sx_in[1] - gap/2)
+        else
+          sx[i-1] <- max(midpoint - gap/2, sx[i-2])
+
+        if (i == length(sx))
+          if (force)
+            sx[i] <- midpoint + gap/2
+          else
+            sx[i] <- min(midpoint + gap/2, sx_in[length(sx)] + gap/2)
+        else
+          sx[i] <- min(midpoint + gap/2, sx[i+1] )
+        changed <- TRUE
+      }
+    }
+  }
+  sx[order(o)]
+}

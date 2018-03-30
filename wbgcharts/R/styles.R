@@ -14,14 +14,16 @@ style_base <- function(textsize=7) {
           legend.position = "right",
           legend.direction = "vertical",
           legend.justification = c(1, 1),
-          legend.key.width = unit(1, "lines")
+          legend.key.width = unit(1, "lines"),
         )
       } else {
         t + theme(
           legend.position = "top",
           legend.direction = "horizontal",
           legend.justification = c(0.5, 1),
-          legend.key.width = unit(1.5, "lines")
+          legend.key.width = unit(1.5, "lines"),
+          legend.text = element_text(margin=margin(0,3,0,0,"lines"))
+          #legend.margin = margin(0,0,0,1,"lines")
         )
       }
     },
@@ -144,7 +146,13 @@ style_atlas <- function(textsize=7, family="Avenir Book", family.bold = "Avenir 
         max_pale <- 0.20
         g(max_pale + (0:(n-1))/(n-1)*(1 - max_pale))
       },
-      continuous.secondary     = function(n) { scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary, spot.secondary.dark))((1:n)/n) },
+      continuous.secondary       = function(n) {
+        g <- scales::gradient_n_pal(c("white", spot.secondary.light, spot.secondary), values = c(0, 0.55, 1))
+        max_pale <- 0.20
+        if      (n == 1) g(c(1))
+        else if (n == 2) g(c(0.55, 1))
+        else             g(max_pale + (0:(n-1))/(n-1)*(1 - max_pale))
+      },
       continuous               = continuous.primary
     ),
 

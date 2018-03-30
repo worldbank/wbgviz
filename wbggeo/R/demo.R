@@ -1,11 +1,29 @@
+padder <- function(spaces = 1) {
+  function(l) {
+    padding <- paste(rep(" ", spaces), collapse = "")
+    paste0(l, c(rep(padding, length(l)-1),""))
+  }
+}
+
 #' @export
-wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1, fill.values = NULL, na.in.legend = TRUE, legend.nrow = NULL) {
+wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_ratio = 1, fill.values = NULL, na.in.legend = TRUE, legend.nrow = NULL, pad.legend = TRUE) {
   if (!na.in.legend) {
     breaks <- unique(data[[variable]])
     breaks <- breaks[!is.na(breaks)]
   } else {
     breaks <- waiver()
   }
+
+  if (pad.legend) {
+    if (is.numeric(pad.legend)) {
+      labeller <- purrr::compose(padder(pad.legend), rename_na("No data"))
+    } else {
+      labeller <- purrr::compose(padder(), rename_na("No data"))
+    }
+  } else {
+    labeller <- rename_na("No data")
+  }
+
   p <- ggplot() +
     geom_map(data = data, aes_string(map_id = iso3c, fill = variable), map = maps$countries) +
     geom_polygon(data = maps$disputed, aes(long, lat, group = group, map_id = id), fill = "grey80") +
@@ -14,9 +32,9 @@ wbg_choropleth <- function(data, maps, style, variable, iso3c = "iso3c", aspect_
     scale_x_continuous(expand = c(0, 0), limits = standard_crop_wintri()$xlim) +
     scale_y_continuous(expand = c(0, 0), limits = standard_crop_wintri()$ylim) + {
       if (is.null(fill.values)) {
-        scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", breaks = breaks, labels = rename_na("No data"), drop = FALSE)
+        scale_fill_manual(palette = style$colors$continuous, na.value = "grey80", breaks = breaks, labels = labeller, drop = FALSE)
       } else {
-        scale_fill_manual(values = fill.values, na.value = "grey80", breaks = breaks, labels = rename_na("No data"), drop = FALSE)
+        scale_fill_manual(values = fill.values, na.value = "grey80", breaks = breaks, labels = labeller, drop = FALSE)
       }
     } +
     coord_equal() +
