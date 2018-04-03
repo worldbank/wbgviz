@@ -165,7 +165,7 @@ geom_other_dotplot <- function(mapping = aes(), linecolor = "black", linesize = 
 
   if (!is.na(arrow) && arrow != FALSE) {
     if (arrow == TRUE) {
-      arrow <- grid::polygonGrob(x = c(0.2,1,0.2,0.2), y = c(0, 0.5, 1, 0))
+      arrow <- grid::polygonGrob(x = c(0.25,1,0.25,0.25), y = c(0.05, 0.5, 0.95, 0.05))
     }
     layers <- c(
       layers,
@@ -174,7 +174,8 @@ geom_other_dotplot <- function(mapping = aes(), linecolor = "black", linesize = 
         data = flipper,
         custom.shapes = list(`99` = arrow),
         size = size,
-        flip.legend = flip.legend
+        flip.legend = flip.legend,
+        ...
       )
     )
   } else {
