@@ -366,6 +366,11 @@ wbg_name <- function(indicatorID, indicator, by, year, mrv, denom) {
 
   if (!missing(indicatorID)) {
     wdi_ind <- get_wbcache()$indicators
+
+    if (!(indicatorID %in% wdi_ind$indicatorID)) {
+      stop("IndicatorID not found. Did you mean to name the first argument using indicator = ?")
+    }
+
     ind_name <- wdi_ind$indicator[wdi_ind$indicatorID == indicatorID]
 
     m <- regexpr("(?<stem>[^\\(]+)\\((?<paren>[^\\)]+)\\)",ind_name, perl=TRUE)
