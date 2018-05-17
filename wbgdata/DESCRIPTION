@@ -1,0 +1,19 @@
+Package: wbgdata
+Type: Package
+Title: Wraper for accessing the World Bank Group API
+Version: 0.1.0
+Authors@R: person("Andrew", "Whitby", email = "awhitby@worldbank.org",
+                  role = c("aut", "cre"))
+Maintainer: Andrew Whitby <awhitby@worldbank.org>
+Description: Based on wbstats, but adds and simplifies to minimse call signatures.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Roxygen: list(markdown = TRUE)
+Imports: dplyr,
+    wbstats,
+    tidyr,
+    digest,
+    rappdirs
+VignetteBuilder: knitr

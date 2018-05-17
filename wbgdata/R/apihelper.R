@@ -1,4 +1,4 @@
-#wb_newcache <- wbstats::wbcache()
+#' @import dplyr
 
 REFRESH_PERIOD_DAYS <- 30
 
@@ -48,7 +48,8 @@ create_wbgref <- function() {
   wbgref <- list()
 
   countries_df <- wb_newcache$countries %>%
-    filter(region != "Aggregates")
+    filter(region != "Aggregates") %>%
+    filter(iso3c != "TWN") # We don't publish data on TWN
 
   wbgref$countries <- list(
     iso2c = countries_df$iso2c,
@@ -212,14 +213,14 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
       offline_df <- wbgdata_from_databank(country, indicator, startdate, enddate, filename = offline_file)
     } else {
       warning("No offline data found for TODO. Will create.")
-      dir.create(offline_path, recursive = TRUE)
+      dir.create(dirname(offline_file), recursive = TRUE, showWarnings = FALSE)
       offline <- "overwrite"
     }
   }
   if (offline == "only") {
     df <- offline_df
   } else {
-    df <- wbstats::wb(country, indicator, startdate, enddate, removeNA = removeNA, cache = cache,...)
+    df <- wbstats::wb(country, indicator, startdate, enddate, removeNA = FALSE, cache = cache,...)
 
     if (!("iso3c" %in% colnames(df))) {
       # Older versions of wbstats don't return, newer ones do
@@ -254,6 +255,12 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
     } else if (offline == "none") {
       # nothing
     }
+  }
+
+  # Handle NA removal outside wbstats so that we can cache with NAs even if
+  # the request does not ask for them, so we don't get a countries missing warning
+  if (removeNA) {
+    df <- df %>% filter(!is.na(value))
   }
 
   if (!missing(years)) {
