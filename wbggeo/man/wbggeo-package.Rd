@@ -7,7 +7,7 @@
 \title{wbggeo: Geospatial dataviz for World Bank Group}
 \description{
 More about what it does (maybe more than one line)
-Use four spaces when indenting paragraphs within the Description.
+    Use four spaces when indenting paragraphs within the Description.
 }
 \author{
 \strong{Maintainer}: Andrew Whitby \email{awhitby@worldbank.org}
