@@ -24,9 +24,9 @@ geom_bubble_map <- function(mapping = NULL, data = NULL, ..., centroids, sort_si
   mapping <- modifyList(mapping, aes(x = long, y = lat))
   if(is.function(data)) stop("Don't currently support data as function")
   datafun <- function(d) {
-    d <- d %>% left_join(centroids, by = setNames("id", as.character(mapping$map_id)))
+    d <- d %>% left_join(centroids, by = setNames("id", rlang::quo_text(mapping$map_id)))
     if (sort_size && !is.null(mapping$size)) {
-      d <- d %>% arrange_(paste0("-",as.character(mapping$size)))
+      d <- d %>% arrange_(paste0("-", rlang::quo_text(mapping$size)))
     }
   }
   #geom_point(mapping, data = if (is.null(data)) datafun else datafun(data), ...)

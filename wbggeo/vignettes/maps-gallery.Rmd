@@ -20,6 +20,6 @@ library(wbggeo)
 ```
 
 ```{r, dpi=72, fig.width=9, fig.height=7, warning=FALSE, message=FALSE}
-print(wbggeo_demo_atlas_5g_choropleth(), style_atlas(11))
-print(wbggeo_demo_atlas_6h_bubble(), style_atlas(11))
+# print(wbggeo_demo_atlas_5g_choropleth(), style_atlas(11))
+# print(wbggeo_demo_atlas_6h_bubble(), style_atlas(11))
 ```
