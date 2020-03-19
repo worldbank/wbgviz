@@ -20,10 +20,10 @@ Each of the four packages must be installed separately. Steps from within R/RStu
   - Take a note of the token [SECRET] - you won't be able to see it again (although you can always delete it and generate another)
 3. Use devtools to install each package in turn:
 ```
-devtools::install_github("worldbank/wbgviz", subdir = "wbgdata", auth_token = "[SECRET]")
-devtools::install_github("worldbank/wbgviz", subdir = "wbgcharts", auth_token = "[SECRET]")
-devtools::install_github("worldbank/wbgviz", subdir = "wbggeo", auth_token = "[SECRET]")
-devtools::install_github("worldbank/wbgviz", subdir = "wbgmaps", auth_token = "[SECRET]")
+devtools::install_github("worldbank/wbgviz", subdir = "wbgdata")
+devtools::install_github("worldbank/wbgviz", subdir = "wbgcharts")
+devtools::install_github("worldbank/wbgviz", subdir = "wbggeo")
+devtools::install_github("worldbank/wbgviz", subdir = "wbgmaps")
 ```
 Note that by default `install_github` does not create vignettes - you can enable this by adding an argument `build_vignettes = TRUE` to each of the three above commands. Then you can view the vignettes included in a package by e.g. `vignette(package="wbgcharts")`.
 
