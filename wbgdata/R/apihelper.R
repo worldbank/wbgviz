@@ -32,7 +32,7 @@ refresh_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts"), fo
       force |
       difftime(Sys.time(), file.info(filename)$mtime, units = "days") > REFRESH_PERIOD_DAYS)
   {
-    newcache <- wbstats::wbcache()
+    newcache <- wbstats::wb_cache()
     if (!file.exists(cachedir)) dir.create(cachedir, recursive = TRUE)
     saveRDS(newcache, file = filename)
   } else {
