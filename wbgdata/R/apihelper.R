@@ -222,10 +222,7 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
   if (offline == "only") {
     df <- offline_df
   } else {
-    print(country)
-    print(indicator)
-    print(startdate)
-    print(enddate)
+
     df <- wbstats::wb_data(country = country,
                            indicator = indicator,
                            start_date = startdate,
@@ -241,7 +238,6 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
       df <- df %>% select(-indicator)
     df <- df %>% select(-iso2c, -country)
     df <- df %>% mutate(date = as.numeric(date))
-print(df)
     df <- df %>% select(iso3c, indicatorID, date, value)
 
     if (offline %in% c("warn", "stop")) {
