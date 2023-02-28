@@ -63,8 +63,8 @@ create_wbgref <- function() {
       ))
     ),
     iso2to3 = countries_df %>% select(iso2c, iso3c),
-    regions = countries_df %>% select(iso3c, region_iso3c = regionID),
-    incomegroups = countries_df %>% select(iso3c, income_iso3c = incomeID)
+    regions = countries_df %>% select(iso3c, region_iso3c),
+    incomegroups = countries_df %>% select(iso3c, income_iso3c = income_level_iso3c)
   )
 
   regions_df <- wb_newcache$countries %>%
