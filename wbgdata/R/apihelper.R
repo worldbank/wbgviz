@@ -26,13 +26,15 @@ get_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts")) {
 }
 
 #' @export
-refresh_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts"), force = FALSE, silent = FALSE) {
+refresh_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts"),
+                            force = FALSE,
+                            silent = FALSE) {
   filename <- file.path(cachedir, "wbcache.RData")
   if (!file.exists(filename) |
       force |
       difftime(Sys.time(), file.info(filename)$mtime, units = "days") > REFRESH_PERIOD_DAYS)
   {
-    newcache <- wbstats::wbcache()
+    newcache <- wbstats::wb_cache()
     if (!file.exists(cachedir)) dir.create(cachedir, recursive = TRUE)
     saveRDS(newcache, file = filename)
   } else {
