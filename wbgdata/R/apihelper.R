@@ -222,7 +222,7 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
   if (offline == "only") {
     df <- offline_df
   } else {
-    df <- wbstats::wb(country, indicator, startdate, enddate, removeNA = FALSE, cache = cache,...)
+    df <- wbstats::wb_data(country, indicator, startdate, enddate, removeNA = FALSE, cache = cache,...)
 
     if (!("iso3c" %in% colnames(df))) {
       # Older versions of wbstats don't return, newer ones do
