@@ -26,13 +26,15 @@ get_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts")) {
 }
 
 #' @export
-refresh_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts"), force = FALSE, silent = FALSE) {
+refresh_wbcache <- function(cachedir = rappdirs::user_cache_dir("wbgcharts"),
+                            force = FALSE,
+                            silent = FALSE) {
   filename <- file.path(cachedir, "wbcache.RData")
   if (!file.exists(filename) |
       force |
       difftime(Sys.time(), file.info(filename)$mtime, units = "days") > REFRESH_PERIOD_DAYS)
   {
-    newcache <- wbstats::wbcache()
+    newcache <- wbstats::wb_cache()
     if (!file.exists(cachedir)) dir.create(cachedir, recursive = TRUE)
     saveRDS(newcache, file = filename)
   } else {
@@ -63,8 +65,8 @@ create_wbgref <- function() {
       ))
     ),
     iso2to3 = countries_df %>% select(iso2c, iso3c),
-    regions = countries_df %>% select(iso3c, region_iso3c = regionID),
-    incomegroups = countries_df %>% select(iso3c, income_iso3c = incomeID)
+    regions = countries_df %>% select(iso3c, region_iso3c),
+    incomegroups = countries_df %>% select(iso3c, income_iso3c = income_level_iso3c)
   )
 
   regions_df <- wb_newcache$countries %>%
@@ -220,7 +222,13 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
   if (offline == "only") {
     df <- offline_df
   } else {
-    df <- wbstats::wb(country, indicator, startdate, enddate, removeNA = FALSE, cache = cache,...)
+
+    df <- wbstats::wb_data(country = country,
+                           indicator = indicator,
+                           start_date = startdate,
+                           end_date = enddate,
+                           cache = cache,
+                           ...)
 
     if (!("iso3c" %in% colnames(df))) {
       # Older versions of wbstats don't return, newer ones do
@@ -230,7 +238,6 @@ wbgdata <-function(country = "all", indicator, startdate, enddate, years, ...,
       df <- df %>% select(-indicator)
     df <- df %>% select(-iso2c, -country)
     df <- df %>% mutate(date = as.numeric(date))
-
     df <- df %>% select(iso3c, indicatorID, date, value)
 
     if (offline %in% c("warn", "stop")) {
